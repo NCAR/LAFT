@@ -1,0 +1,68 @@
+{
+  "proc": "kessler_init",
+  "timestamp": "2026-09-04T10:13:59.720767",
+  "metadata": {
+    "jax_file": "out/jax/kessler_init.py",
+    "has_io": false,
+    "wrapper_only": false,
+    "scalar_only": true,
+    "scalar_jax": false,
+    "jax_required": false,
+    "args_count": 5,
+    "writes_count": 2
+  },
+  "checks": [
+    {
+      "name": "has bridge metadata",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "no jax imports (scalar-only)",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "no numpy",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "has wrapper",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "no core (scalar-only)",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "core has no I/O",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "wrapper has no I/O",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "wrapper args match expected",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "bridge call matches JAX signature",
+      "passed": true,
+      "details": null
+    }
+  ],
+  "summary": {
+    "total_checks": 9,
+    "passed": 9,
+    "failed": 0,
+    "score": 100.0,
+    "overall": "PASS"
+  }
+}

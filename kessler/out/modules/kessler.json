@@ -1,0 +1,27 @@
+{
+  "module_name": "kessler",
+  "source_file": "data/src/kessler.F90",
+  "uses_modules": [
+    "ccpp_kinds"
+  ],
+  "module_variables": [
+    {
+      "name": "lv",
+      "type": "real"
+    },
+    {
+      "name": "pref",
+      "type": "real"
+    },
+    {
+      "name": "rhoqr",
+      "type": "real"
+    }
+  ],
+  "public_entities": [],
+  "private_entities": [],
+  "procedures": [
+    "kessler_init",
+    "kessler_run"
+  ]
+}

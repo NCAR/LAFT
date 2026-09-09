@@ -1,0 +1,93 @@
+{
+  "workflow": "workflow_translator/TRANSLATE_WORKFLOW.md",
+  "status": "complete",
+  "llm": "Gemini 3.1 Pro (via Gemini CLI code agent)",
+  "updated_at": "2026-09-04T10:35:14",
+  "completed_steps": [
+    "generated out/jax/kessler_init.py",
+    "generated out/jax/kessler_run.py",
+    "froze four-pass statistics",
+    "semantic audit passed (0 FAIL, 3 WARN, 0 waived)",
+    "lint passed",
+    "runtime validation (PBS 7313832) + bridge suite 17/17 (PBS 7313833) passed",
+    "driver passed (host mode, PBS 7313840)",
+    "comparison ALL PASS (host mode, PBS 7313848)",
+    "snapshotted out/jax/*.validated.py"
+  ],
+  "pbs_runtime_validation": {
+    "job_id": "7313832",
+    "job_name": "runtimevalidate",
+    "expected_log": "runtimevalidate.o7313832",
+    "submit_command": "qsub pbsJobs/jax_gpu_runtimevalid.sh",
+    "status_command": "qstat 7313832"
+  },
+  "required_result_files": [
+    "out/lint/_summary.json",
+    "out/validation/<proc>_runtime.json (one per procedure)",
+    "out/driver/kessler_driver.json",
+    "out/driver/compare_results_fortran_jax.txt",
+    "out/driver/comparison.json"
+  ],
+  "next_steps": [
+    "check qstat 7313848",
+    "read comparevalues.o7313848",
+    "read out/driver/compare_results_fortran_jax.txt",
+    "read out/driver/comparison.json (convenience; check invariants + status)",
+    "write out/jax/translation_report.md"
+  ],
+  "step_timestamps": [
+    {
+      "step": "generated out/jax/kessler_init.py",
+      "at": "2026-09-04T10:31:28"
+    },
+    {
+      "step": "generated out/jax/kessler_run.py",
+      "at": "2026-09-04T10:31:28"
+    },
+    {
+      "step": "froze four-pass statistics",
+      "at": "2026-09-04T10:31:29"
+    },
+    {
+      "step": "semantic audit passed (0 FAIL, 3 WARN, 0 waived)",
+      "at": "2026-09-04T10:31:42"
+    },
+    {
+      "step": "lint passed",
+      "at": "2026-09-04T10:31:42"
+    },
+    {
+      "step": "runtime validation (PBS 7313832) + bridge suite 17/17 (PBS 7313833) passed",
+      "at": "2026-09-04T10:32:50"
+    },
+    {
+      "step": "driver passed (host mode, PBS 7313840)",
+      "at": "2026-09-04T10:33:41"
+    },
+    {
+      "step": "comparison ALL PASS (host mode, PBS 7313848)",
+      "at": "2026-09-04T10:35:14"
+    },
+    {
+      "step": "snapshotted out/jax/*.validated.py",
+      "at": "2026-09-04T10:35:14"
+    }
+  ],
+  "pbs_driver": {
+    "job_id": "7313840",
+    "job_name": "jaxdrvgpu",
+    "expected_log": "jaxdrvgpu.o7313840",
+    "submit_command": "qsub pbsJobs/jax_driver_gpu.sh",
+    "status_command": "qstat 7313840"
+  },
+  "pbs_comparison": {
+    "job_id": "7313848",
+    "job_name": "comparevalues",
+    "expected_log": "comparevalues.o7313848",
+    "submit_command": "qsub pbsJobs/jax_gpu_compvalues.sh",
+    "status_command": "qstat 7313848"
+  },
+  "fix_attempts": [],
+  "fix_attempts_used": 0,
+  "fix_attempts_max": 5
+}

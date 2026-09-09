@@ -1,0 +1,40 @@
+{
+  "stage": "completeness_check",
+  "timestamp": "2026-09-04T10:13:59.632129",
+  "total": 2,
+  "pass": 2,
+  "warn": 0,
+  "fail": 0,
+  "missing": 0,
+  "status": "PASS",
+  "results": [
+    {
+      "proc": "kessler_init",
+      "fortran_lines": 13,
+      "jax_lines": 42,
+      "jax_code_lines": 24,
+      "ratio": 1.846,
+      "scaffold_phrases": [],
+      "dead_calls": [],
+      "absent_calls": [],
+      "silent_stub": false,
+      "scalar_misclassified": false,
+      "low_ratio_advisory": false,
+      "verdict": "PASS"
+    },
+    {
+      "proc": "kessler_run",
+      "fortran_lines": 173,
+      "jax_lines": 313,
+      "jax_code_lines": 220,
+      "ratio": 1.272,
+      "scaffold_phrases": [],
+      "dead_calls": [],
+      "absent_calls": [],
+      "silent_stub": false,
+      "scalar_misclassified": false,
+      "low_ratio_advisory": false,
+      "verdict": "PASS"
+    }
+  ]
+}

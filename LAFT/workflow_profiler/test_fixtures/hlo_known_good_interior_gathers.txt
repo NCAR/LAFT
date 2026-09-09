@@ -1,0 +1,760 @@
+HloModule jit_kessler_run_core, is_scheduled=true, entry_computation_layout={(f64[56,100]{1,0}, f64[], f64[], f64[56,100]{1,0}, f64[], /*index=5*/f64[56,100]{1,0}, f64[56,100]{1,0}, f64[56,100]{1,0}, f64[56,100]{1,0}, f64[56,100]{1,0}, /*index=10*/f64[], f64[56,100]{1,0}, f64[56,100]{1,0})->(f64[56,100]{1,0}, f64[56,100]{1,0}, f64[56,100]{1,0}, f64[56,100]{1,0}, f64[100]{0}, /*index=5*/f64[56,100]{1,0}, s32[], f64[], f64[], f64[])}, allow_spmd_sharding_propagation_to_parameters={true,true,true,true,true,true,true,true,true,true,true,true,true}, allow_spmd_sharding_propagation_to_output={true,true,true,true,true,true,true,true,true,true}, frontend_attributes={fingerprint_before_lhs="805d8dd92e9cef829d673fdb425af0b4"}
+
+%fused_select.1 (param_0.310: f64[100,56], param_1.394: f64[100], param_2.272: f64[], param_3.222: f64[100], param_4.185: f64[100,56], param_5.137: pred[56], param_6.128: f64[56,100], param_7.94: f64[100,56], param_8.74: f64[100,56], param_9.68: f64[100,56], param_10.52: f64[100,56], param_11.47: f64[56,100], param_12.45: f64[56,100], param_13.30: f64[], param_14.32: f64[100,56], param_15.32: f64[56,100], param_16.31: f64[100], param_17.21: s32[56], param_18.31: f64[100]) -> (f64[100,56], f64[100,56], f64[100,56], f64[100,56], f64[100,56], /*index=5*/f64[100,56]) {
+  %param_2.272 = f64[] parameter(2)
+  %broadcast.441.14 = f64[100]{0} broadcast(%param_2.272), dimensions={}
+  %param_1.394 = f64[100]{0} parameter(1)
+  %subtract.442.7 = f64[100]{0} subtract(%broadcast.441.14, %param_1.394)
+  %abs.443.5 = f64[100]{0} abs(%subtract.442.7)
+  %constant_199_2 = f64[] constant(1e-05)
+  %broadcast.200.3 = f64[100]{0} broadcast(%constant_199_2), dimensions={}
+  %compare.444.3 = pred[100]{0} compare(%abs.443.5, %broadcast.200.3), direction=GT
+  %broadcast.445.5 = pred[100,56]{1,0} broadcast(%compare.444.3), dimensions={0}
+  %param_7.94 = f64[100,56]{1,0} parameter(7)
+  %constant_211_1_clone_1 = f64[] constant(36.34)
+  %broadcast.212.1.clone.1 = f64[100,56]{1,0} broadcast(%constant_211_1_clone_1), dimensions={}
+  %multiply.403.1.clone.1 = f64[100,56]{1,0} multiply(%param_7.94, %broadcast.212.1.clone.1)
+  %param_8.74 = f64[100,56]{1,0} parameter(8)
+  %param_9.68 = f64[100,56]{1,0} parameter(9)
+  %param_3.222 = f64[100]{0} parameter(3)
+  %broadcast.314.1.clone.1 = f64[100,56]{1,0} broadcast(%param_3.222), dimensions={0}
+  %constant_30_1_clone_1 = f64[] constant(-0.001)
+  %broadcast.65.1.clone.1 = f64[100,56]{1,0} broadcast(%constant_30_1_clone_1), dimensions={}
+  %add.5.1.clone.1 = f64[100,56]{1,0} add(%param_9.68, %broadcast.65.1.clone.1)
+  %constant_241_1_clone_1 = f64[] constant(0.001)
+  %broadcast.242.1.clone.1 = f64[100,56]{1,0} broadcast(%constant_241_1_clone_1), dimensions={}
+  %multiply.309.1.clone.1 = f64[100,56]{1,0} multiply(%add.5.1.clone.1, %broadcast.242.1.clone.1)
+  %constant_207_9_clone_1 = f64[] constant(0)
+  %broadcast.240.1.clone.1 = f64[100,56]{1,0} broadcast(%constant_207_9_clone_1), dimensions={}
+  %maximum.310.1.clone.1 = f64[100,56]{1,0} maximum(%multiply.309.1.clone.1, %broadcast.240.1.clone.1)
+  %multiply.315.1.clone.1 = f64[100,56]{1,0} multiply(%broadcast.314.1.clone.1, %maximum.310.1.clone.1)
+  %subtract.316.1.clone.1 = f64[100,56]{1,0} subtract(%param_9.68, %multiply.315.1.clone.1)
+  %constant_237_1_clone_1 = f64[] constant(2.2)
+  %broadcast.238.1.clone.1 = f64[100]{0} broadcast(%constant_237_1_clone_1), dimensions={}
+  %multiply.317.1.clone.1 = f64[100]{0} multiply(%param_3.222, %broadcast.238.1.clone.1)
+  %broadcast.322.1.clone.1 = f64[100,56]{1,0} broadcast(%multiply.317.1.clone.1), dimensions={0}
+  %constant_235_1_clone_1 = f64[] constant(0.875)
+  %broadcast.236.3.clone.1 = f64[100,56]{1,0} broadcast(%constant_235_1_clone_1), dimensions={}
+  %power.318.3.clone.1 = f64[100,56]{1,0} power(%param_8.74, %broadcast.236.3.clone.1)
+  %multiply.323.1.clone.1 = f64[100,56]{1,0} multiply(%broadcast.322.1.clone.1, %power.318.3.clone.1)
+  %constant_204_1_clone_1 = f64[] constant(1)
+  %broadcast.234.2.clone.1 = f64[100,56]{1,0} broadcast(%constant_204_1_clone_1), dimensions={}
+  %add.324.1.clone.1 = f64[100,56]{1,0} add(%multiply.323.1.clone.1, %broadcast.234.2.clone.1)
+  %divide.325.1.clone.1 = f64[100,56]{1,0} divide(%subtract.316.1.clone.1, %add.324.1.clone.1)
+  %subtract.326.2.clone.1 = f64[100,56]{1,0} subtract(%param_9.68, %divide.325.1.clone.1)
+  %add.329.1.clone.1 = f64[100,56]{1,0} add(%param_8.74, %subtract.326.2.clone.1)
+  %param_5.137 = pred[56]{0} parameter(5)
+  %broadcast.1.1.clone.1 = pred[100,56]{1,0} broadcast(%param_5.137), dimensions={1}
+  %negate.291.3.clone.1 = f64[100]{0} negate(%param_3.222)
+  %slice.292.3.clone.1 = f64[100,1]{1,0} slice(%param_8.74), slice={[0:100], [55:56]}
+  %bitcast.213.clone.1 = f64[100]{0} bitcast(%slice.292.3.clone.1)
+  %multiply.294.5.clone.1 = f64[100]{0} multiply(%negate.291.3.clone.1, %bitcast.213.clone.1)
+  %param_0.310 = f64[100,56]{1,0} parameter(0)
+  %slice.295.3.clone.1 = f64[100,1]{1,0} slice(%param_0.310), slice={[0:100], [55:56]}
+  %bitcast.1.5.clone.1 = f64[100]{0} bitcast(%slice.295.3.clone.1)
+  %multiply.297.5.clone.1 = f64[100]{0} multiply(%multiply.294.5.clone.1, %bitcast.1.5.clone.1)
+  %param_18.31 = f64[100]{0} parameter(18)
+  %constant_243_1_clone_1 = f64[] constant(0.5)
+  %broadcast.244.3.clone.1 = f64[100]{0} broadcast(%constant_243_1_clone_1), dimensions={}
+  %multiply.298.3.clone.1 = f64[100]{0} multiply(%param_18.31, %broadcast.244.3.clone.1)
+  %divide.299.3.clone.1 = f64[100]{0} divide(%multiply.297.5.clone.1, %multiply.298.3.clone.1)
+  %broadcast.2.1.clone.1 = f64[100,56]{1,0} broadcast(%divide.299.3.clone.1), dimensions={0}
+  %param_6.128 = f64[56,100]{0,1} parameter(6)
+  %param_17.21 = s32[56]{0} parameter(17)
+  %constant_247_1_clone_1 = s32[] constant(0)
+  %broadcast.248.1.clone.1 = s32[56]{0} broadcast(%constant_247_1_clone_1), dimensions={}
+  %compare.261.1.clone.1 = pred[56]{0} compare(%param_17.21, %broadcast.248.1.clone.1), direction=LT
+  %constant_245_1_clone_1 = s32[] constant(56)
+  %broadcast.246.1.clone.1 = s32[56]{0} broadcast(%constant_245_1_clone_1), dimensions={}
+  %add.262.1.clone.1 = s32[56]{0} add(%param_17.21, %broadcast.246.1.clone.1)
+  %select.263.1.clone.1 = s32[56]{0} select(%compare.261.1.clone.1, %add.262.1.clone.1, %param_17.21)
+  %bitcast.2.5.clone.1 = s32[56,1]{1,0} bitcast(%select.263.1.clone.1)
+  %gather.1.3.clone.1 = f64[56,1,100]{0,2,1} gather(%param_6.128, %bitcast.2.5.clone.1), offset_dims={1,2}, collapsed_slice_dims={}, start_index_map={0}, index_vector_dim=1, slice_sizes={1,100}
+  %bitcast.27.3.clone.1 = f64[1,100,56]{2,1,0} bitcast(%gather.1.3.clone.1)
+  %bitcast.176.3.clone.1 = f64[56,100]{0,1} bitcast(%param_8.74)
+  %gather.2.3.clone.1 = f64[56,1,100]{0,2,1} gather(%bitcast.176.3.clone.1, %bitcast.2.5.clone.1), offset_dims={1,2}, collapsed_slice_dims={}, start_index_map={0}, index_vector_dim=1, slice_sizes={1,100}
+  %bitcast.30.3.clone.1 = f64[1,100,56]{2,1,0} bitcast(%gather.2.3.clone.1)
+  %multiply.16.3.clone.1 = f64[1,100,56]{2,1,0} multiply(%bitcast.27.3.clone.1, %bitcast.30.3.clone.1)
+  %bitcast.180.3.clone.1 = f64[56,100]{0,1} bitcast(%param_0.310)
+  %gather.3.3.clone.1 = f64[56,1,100]{0,2,1} gather(%bitcast.180.3.clone.1, %bitcast.2.5.clone.1), offset_dims={1,2}, collapsed_slice_dims={}, start_index_map={0}, index_vector_dim=1, slice_sizes={1,100}
+  %bitcast.34.3.clone.1 = f64[1,100,56]{2,1,0} bitcast(%gather.3.3.clone.1)
+  %multiply.17.3.clone.1 = f64[1,100,56]{2,1,0} multiply(%multiply.16.3.clone.1, %bitcast.34.3.clone.1)
+  %bitcast.37.3.clone.1 = f64[100,56]{1,0} bitcast(%multiply.17.3.clone.1)
+  %bitcast.23.19.clone.1 = f64[100,56]{1,0} bitcast(%param_6.128)
+  %multiply.280.3.clone.1 = f64[100,56]{1,0} multiply(%bitcast.23.19.clone.1, %param_8.74)
+  %multiply.281.1.clone.1 = f64[100,56]{1,0} multiply(%multiply.280.3.clone.1, %param_0.310)
+  %subtract.282.3.clone.1 = f64[100,56]{1,0} subtract(%bitcast.37.3.clone.1, %multiply.281.1.clone.1)
+  %multiply.287.1.clone.1 = f64[100,56]{1,0} multiply(%broadcast.314.1.clone.1, %subtract.282.3.clone.1)
+  %param_4.185 = f64[100,56]{1,0} parameter(4)
+  %multiply.289.3.clone.1 = f64[100,56]{1,0} multiply(%bitcast.23.19.clone.1, %param_4.185)
+  %divide.290.5.clone.1 = f64[100,56]{1,0} divide(%multiply.287.1.clone.1, %multiply.289.3.clone.1)
+  %select.1.5.clone.1 = f64[100,56]{1,0} select(%broadcast.1.1.clone.1, %broadcast.2.1.clone.1, %divide.290.5.clone.1)
+  %add.330.3.clone.1 = f64[100,56]{1,0} add(%add.329.1.clone.1, %select.1.5.clone.1)
+  %maximum.331.1.clone.1 = f64[100,56]{1,0} maximum(%add.330.3.clone.1, %broadcast.240.1.clone.1)
+  %multiply.353.9.clone.1 = f64[100,56]{1,0} multiply(%bitcast.23.19.clone.1, %maximum.331.1.clone.1)
+  %constant_225_1_clone_1 = f64[] constant(0.2046)
+  %broadcast.226.3.clone.1 = f64[100,56]{1,0} broadcast(%constant_225_1_clone_1), dimensions={}
+  %power.354.3.clone.1 = f64[100,56]{1,0} power(%multiply.353.9.clone.1, %broadcast.226.3.clone.1)
+  %constant_223_1_clone_1 = f64[] constant(124.9)
+  %broadcast.224.3.clone.1 = f64[100,56]{1,0} broadcast(%constant_223_1_clone_1), dimensions={}
+  %multiply.355.3.clone.1 = f64[100,56]{1,0} multiply(%power.354.3.clone.1, %broadcast.224.3.clone.1)
+  %constant_221_1_clone_1 = f64[] constant(1.6)
+  %broadcast.222.3.clone.1 = f64[100,56]{1,0} broadcast(%constant_221_1_clone_1), dimensions={}
+  %add.356.3.clone.1 = f64[100,56]{1,0} add(%multiply.355.3.clone.1, %broadcast.222.3.clone.1)
+  %constant_219_1_clone_1 = f64[] constant(0.525)
+  %broadcast.220.3.clone.1 = f64[100,56]{1,0} broadcast(%constant_219_1_clone_1), dimensions={}
+  %power.359.3.clone.1 = f64[100,56]{1,0} power(%multiply.353.9.clone.1, %broadcast.220.3.clone.1)
+  %multiply.360.3.clone.1 = f64[100,56]{1,0} multiply(%add.356.3.clone.1, %power.359.3.clone.1)
+  %param_15.32 = f64[56,100]{0,1} parameter(15)
+  %bitcast.19.20.clone.1 = f64[100,56]{1,0} bitcast(%param_15.32)
+  %constant_217_1_clone_1 = f64[] constant(2550000)
+  %broadcast.82.3.clone.1 = f64[100,56]{1,0} broadcast(%constant_217_1_clone_1), dimensions={}
+  %multiply.18.7.clone.1 = f64[100,56]{1,0} multiply(%bitcast.19.20.clone.1, %broadcast.82.3.clone.1)
+  %param_11.47 = f64[56,100]{0,1} parameter(11)
+  %bitcast.15.18.clone.1 = f64[100,56]{1,0} bitcast(%param_11.47)
+  %param_10.52 = f64[100,56]{1,0} parameter(10)
+  %multiply.333.11.clone.1 = f64[100,56]{1,0} multiply(%bitcast.15.18.clone.1, %param_10.52)
+  %constant_25_2_clone_1 = f64[] constant(-273)
+  %broadcast.62.5.clone.1 = f64[100,56]{1,0} broadcast(%constant_25_2_clone_1), dimensions={}
+  %add.2.5.clone.1 = f64[100,56]{1,0} add(%multiply.333.11.clone.1, %broadcast.62.5.clone.1)
+  %constant_229_2_clone_1 = f64[] constant(17.27)
+  %broadcast.230.5.clone.1 = f64[100,56]{1,0} broadcast(%constant_229_2_clone_1), dimensions={}
+  %multiply.335.5.clone.1 = f64[100,56]{1,0} multiply(%add.2.5.clone.1, %broadcast.230.5.clone.1)
+  %constant_26_1_clone_1 = f64[] constant(-36)
+  %broadcast.63.8.clone.1 = f64[100,56]{1,0} broadcast(%constant_26_1_clone_1), dimensions={}
+  %add.3.8.clone.1 = f64[100,56]{1,0} add(%multiply.333.11.clone.1, %broadcast.63.8.clone.1)
+  %divide.337.5.clone.1 = f64[100,56]{1,0} divide(%multiply.335.5.clone.1, %add.3.8.clone.1)
+  %exponential.338.3.clone.1 = f64[100,56]{1,0} exponential(%divide.337.5.clone.1)
+  %multiply.340.13.clone.1 = f64[100,56]{1,0} multiply(%bitcast.19.20.clone.1, %exponential.338.3.clone.1)
+  %constant_215_1_clone_1 = f64[] constant(3.8)
+  %broadcast.216.3.clone.1 = f64[100,56]{1,0} broadcast(%constant_215_1_clone_1), dimensions={}
+  %multiply.362.3.clone.1 = f64[100,56]{1,0} multiply(%multiply.340.13.clone.1, %broadcast.216.3.clone.1)
+  %divide.364.5.clone.1 = f64[100,56]{1,0} divide(%multiply.18.7.clone.1, %multiply.362.3.clone.1)
+  %constant_213_1_clone_1 = f64[] constant(540000)
+  %broadcast.214.3.clone.1 = f64[100,56]{1,0} broadcast(%constant_213_1_clone_1), dimensions={}
+  %add.365.3.clone.1 = f64[100,56]{1,0} add(%divide.364.5.clone.1, %broadcast.214.3.clone.1)
+  %divide.366.3.clone.1 = f64[100,56]{1,0} divide(%multiply.360.3.clone.1, %add.365.3.clone.1)
+  %multiply.371.1.clone.1 = f64[100,56]{1,0} multiply(%broadcast.314.1.clone.1, %divide.366.3.clone.1)
+  %param_14.32 = f64[100,56]{1,0} parameter(14)
+  %subtract.372.1.clone.1 = f64[100,56]{1,0} subtract(%multiply.340.13.clone.1, %param_14.32)
+  %maximum.373.1.clone.1 = f64[100,56]{1,0} maximum(%subtract.372.1.clone.1, %broadcast.240.1.clone.1)
+  %multiply.375.7.clone.1 = f64[100,56]{1,0} multiply(%bitcast.23.19.clone.1, %multiply.340.13.clone.1)
+  %divide.376.5.clone.1 = f64[100,56]{1,0} divide(%maximum.373.1.clone.1, %multiply.375.7.clone.1)
+  %multiply.377.3.clone.1 = f64[100,56]{1,0} multiply(%multiply.371.1.clone.1, %divide.376.5.clone.1)
+  %subtract.341.1.clone.1 = f64[100,56]{1,0} subtract(%param_14.32, %multiply.340.13.clone.1)
+  %param_16.31 = f64[100]{0} parameter(16)
+  %broadcast.345.3.clone.1 = f64[100,56]{1,0} broadcast(%param_16.31), dimensions={0}
+  %multiply.346.3.clone.1 = f64[100,56]{1,0} multiply(%multiply.340.13.clone.1, %broadcast.345.3.clone.1)
+  %multiply.348.5.clone.1 = f64[100,56]{1,0} multiply(%add.3.8.clone.1, %add.3.8.clone.1)
+  %divide.349.5.clone.1 = f64[100,56]{1,0} divide(%multiply.346.3.clone.1, %multiply.348.5.clone.1)
+  %add.350.3.clone.1 = f64[100,56]{1,0} add(%divide.349.5.clone.1, %broadcast.234.2.clone.1)
+  %divide.351.1.clone.1 = f64[100,56]{1,0} divide(%subtract.341.1.clone.1, %add.350.3.clone.1)
+  %negate.378.1.clone.1 = f64[100,56]{1,0} negate(%divide.351.1.clone.1)
+  %subtract.327.7.clone.1 = f64[100,56]{1,0} subtract(%param_9.68, %subtract.326.2.clone.1)
+  %maximum.328.5.clone.1 = f64[100,56]{1,0} maximum(%subtract.327.7.clone.1, %broadcast.240.1.clone.1)
+  %subtract.379.1.clone.1 = f64[100,56]{1,0} subtract(%negate.378.1.clone.1, %maximum.328.5.clone.1)
+  %maximum.380.1.clone.1 = f64[100,56]{1,0} maximum(%subtract.379.1.clone.1, %broadcast.240.1.clone.1)
+  %minimum.381.1.clone.1 = f64[100,56]{1,0} minimum(%maximum.380.1.clone.1, %maximum.331.1.clone.1)
+  %minimum.382.1.clone.1 = f64[100,56]{1,0} minimum(%multiply.377.3.clone.1, %minimum.381.1.clone.1)
+  %subtract.400.5.clone.1 = f64[100,56]{1,0} subtract(%maximum.331.1.clone.1, %minimum.382.1.clone.1)
+  %maximum.401.5.clone.1 = f64[100,56]{1,0} maximum(%subtract.400.5.clone.1, %broadcast.240.1.clone.1)
+  %multiply.405.5.clone.1 = f64[100,56]{1,0} multiply(%maximum.401.5.clone.1, %bitcast.23.19.clone.1)
+  %constant_209_1_clone_1 = f64[] constant(0.1364)
+  %broadcast.210.1.clone.1 = f64[100,56]{1,0} broadcast(%constant_209_1_clone_1), dimensions={}
+  %power.406.3.clone.1 = f64[100,56]{1,0} power(%multiply.405.5.clone.1, %broadcast.210.1.clone.1)
+  %multiply.407.1.clone.1 = f64[100,56]{1,0} multiply(%multiply.403.1.clone.1, %power.406.3.clone.1)
+  %select.454.1 = f64[100,56]{1,0} select(%broadcast.445.5, %multiply.407.1.clone.1, %param_0.310)
+  %abs.411.3.clone.1 = f64[100,56]{1,0} abs(%multiply.407.1.clone.1)
+  %constant_205_1_clone_1 = f64[] constant(1e-12)
+  %broadcast.206.3.clone.1 = f64[100,56]{1,0} broadcast(%constant_205_1_clone_1), dimensions={}
+  %compare.412.3.clone.1 = pred[100,56]{1,0} compare(%abs.411.3.clone.1, %broadcast.206.3.clone.1), direction=GT
+  %not.422.1.clone.1 = pred[56]{0} not(%param_5.137)
+  %broadcast.426.1.clone.1 = pred[100,56]{1,0} broadcast(%not.422.1.clone.1), dimensions={1}
+  %and.427.1.clone.1 = pred[100,56]{1,0} and(%compare.412.3.clone.1, %broadcast.426.1.clone.1)
+  %constant_202_1_clone_1 = f64[] constant(0.8)
+  %broadcast.203.1.clone.1 = f64[100,56]{1,0} broadcast(%constant_202_1_clone_1), dimensions={}
+  %multiply.420.1.clone.1 = f64[100,56]{1,0} multiply(%param_4.185, %broadcast.203.1.clone.1)
+  %select.2.3.clone.1 = f64[100,56]{1,0} select(%compare.412.3.clone.1, %multiply.407.1.clone.1, %broadcast.234.2.clone.1)
+  %divide.421.3.clone.1 = f64[100,56]{1,0} divide(%multiply.420.1.clone.1, %select.2.3.clone.1)
+  %add.402.4.clone.1 = f64[100]{0} add(%param_1.394, %param_3.222)
+  %subtract.409.5.clone.1 = f64[100]{0} subtract(%broadcast.441.14, %add.402.4.clone.1)
+  %broadcast.208.3.clone.1 = f64[100]{0} broadcast(%constant_207_9_clone_1), dimensions={}
+  %maximum.410.3.clone.1 = f64[100]{0} maximum(%subtract.409.5.clone.1, %broadcast.208.3.clone.1)
+  %broadcast.4.1.clone.1 = f64[100,56]{1,0} broadcast(%maximum.410.3.clone.1), dimensions={0}
+  %select.3.1.clone.1 = f64[100,56]{1,0} select(%and.427.1.clone.1, %divide.421.3.clone.1, %broadcast.4.1.clone.1)
+  %select.452.1.clone.1 = f64[100,56]{1,0} select(%broadcast.445.5, %maximum.401.5.clone.1, %param_8.74)
+  %negate.386.7.clone.1 = f64[100,56]{1,0} negate(%maximum.328.5.clone.1)
+  %maximum.387.7.clone.1 = f64[100,56]{1,0} maximum(%divide.351.1.clone.1, %negate.386.7.clone.1)
+  %add.399.1.clone.1 = f64[100,56]{1,0} add(%maximum.328.5.clone.1, %maximum.387.7.clone.1)
+  %select.450.1.clone.1 = f64[100,56]{1,0} select(%broadcast.445.5, %add.399.1.clone.1, %param_9.68)
+  %param_13.30 = f64[] parameter(13)
+  %broadcast.81.1.clone.1 = f64[100,56]{1,0} broadcast(%param_13.30), dimensions={}
+  %param_12.45 = f64[56,100]{0,1} parameter(12)
+  %bitcast.13.7.clone.1 = f64[100,56]{1,0} bitcast(%param_12.45)
+  %multiply.15.7.clone.1 = f64[100,56]{1,0} multiply(%bitcast.13.7.clone.1, %bitcast.15.18.clone.1)
+  %divide.10.5.clone.1 = f64[100,56]{1,0} divide(%broadcast.81.1.clone.1, %multiply.15.7.clone.1)
+  %subtract.388.1.clone.1 = f64[100,56]{1,0} subtract(%maximum.387.7.clone.1, %minimum.382.1.clone.1)
+  %multiply.390.3.clone.1 = f64[100,56]{1,0} multiply(%divide.10.5.clone.1, %subtract.388.1.clone.1)
+  %add.391.1.clone.1 = f64[100,56]{1,0} add(%param_10.52, %multiply.390.3.clone.1)
+  %select.446.1.clone.1 = f64[100,56]{1,0} select(%broadcast.445.5, %add.391.1.clone.1, %param_10.52)
+  %subtract.394.3.clone.1 = f64[100,56]{1,0} subtract(%param_14.32, %maximum.387.7.clone.1)
+  %add.395.3.clone.1 = f64[100,56]{1,0} add(%subtract.394.3.clone.1, %minimum.382.1.clone.1)
+  %maximum.396.3.clone.1 = f64[100,56]{1,0} maximum(%add.395.3.clone.1, %broadcast.240.1.clone.1)
+  %select.448.1.clone.1 = f64[100,56]{1,0} select(%broadcast.445.5, %maximum.396.3.clone.1, %param_14.32)
+  ROOT %tuple.7 = (f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, /*index=5*/f64[100,56]{1,0}) tuple(%select.454.1, %select.3.1.clone.1, %select.452.1.clone.1, %select.450.1.clone.1, %select.446.1.clone.1, /*index=5*/%select.448.1.clone.1)
+}
+
+%region_0.159 (Arg_0.156: f64[], Arg_1.157: f64[]) -> f64[] {
+  %Arg_1.157 = f64[] parameter(1)
+  %Arg_0.156 = f64[] parameter(0)
+  ROOT %minimum.158.0 = f64[] minimum(%Arg_0.156, %Arg_1.157)
+}
+
+%fused_reduce (param_0.213: f64[100,56]) -> f64[100] {
+  %param_0.213 = f64[100,56]{1,0} parameter(0)
+  %constant_201_1 = f64[] constant(inf)
+  ROOT %reduce.439.1 = f64[100]{0} reduce(%param_0.213, %constant_201_1), dimensions={1}, to_apply=%region_0.159
+}
+
+%fused_select (param_0.206: f64[100], param_1.270: f64[100], param_2.190: f64[100], param_3.152: f64[], param_4.191: f64[100], param_5.143: f64[], param_6.134: f64[100,56], param_7.93: f64[100,56], param_8.72: f64[56,100]) -> (f64[100], f64[100], f64[100]) {
+  %param_3.152 = f64[] parameter(3)
+  %broadcast.441.20 = f64[100]{0} broadcast(%param_3.152), dimensions={}
+  %param_2.190 = f64[100]{0} parameter(2)
+  %subtract.442.13 = f64[100]{0} subtract(%broadcast.441.20, %param_2.190)
+  %abs.443.11 = f64[100]{0} abs(%subtract.442.13)
+  %constant_199_5 = f64[] constant(1e-05)
+  %broadcast.200.9 = f64[100]{0} broadcast(%constant_199_5), dimensions={}
+  %compare.444.9 = pred[100]{0} compare(%abs.443.11, %broadcast.200.9), direction=GT
+  %param_0.206 = f64[100]{0} parameter(0)
+  %add.402.6 = f64[100]{0} add(%param_2.190, %param_0.206)
+  %subtract.409.7 = f64[100]{0} subtract(%broadcast.441.20, %add.402.6)
+  %constant_207_1 = f64[] constant(0)
+  %broadcast.208.5 = f64[100]{0} broadcast(%constant_207_1), dimensions={}
+  %maximum.410.5 = f64[100]{0} maximum(%subtract.409.7, %broadcast.208.5)
+  %param_1.270 = f64[100]{0} parameter(1)
+  %minimum.440.1 = f64[100]{0} minimum(%maximum.410.5, %param_1.270)
+  %select.455.1 = f64[100]{0} select(%compare.444.9, %minimum.440.1, %param_0.206)
+  %select.456.1.clone.1 = f64[100]{0} select(%compare.444.9, %add.402.6, %param_2.190)
+  %param_4.191 = f64[100]{0} parameter(4)
+  %param_8.72 = f64[56,100]{1,0} parameter(8)
+  %slice.249.1.clone.1 = f64[1,100]{1,0} slice(%param_8.72), slice={[0:1], [0:100]}
+  %bitcast.4.3.clone.1 = f64[100]{0} bitcast(%slice.249.1.clone.1)
+  %param_7.93 = f64[100,56]{1,0} parameter(7)
+  %slice.251.1.clone.1 = f64[100,1]{1,0} slice(%param_7.93), slice={[0:100], [0:1]}
+  %bitcast.5.3.clone.1 = f64[100]{0} bitcast(%slice.251.1.clone.1)
+  %multiply.253.3.clone.1 = f64[100]{0} multiply(%bitcast.4.3.clone.1, %bitcast.5.3.clone.1)
+  %param_6.134 = f64[100,56]{1,0} parameter(6)
+  %slice.254.1.clone.1 = f64[100,1]{1,0} slice(%param_6.134), slice={[0:100], [0:1]}
+  %bitcast.6.7.clone.1 = f64[100]{0} bitcast(%slice.254.1.clone.1)
+  %multiply.256.7.clone.1 = f64[100]{0} multiply(%multiply.253.3.clone.1, %bitcast.6.7.clone.1)
+  %param_5.143 = f64[] parameter(5)
+  %broadcast.257.1.clone.1 = f64[100]{0} broadcast(%param_5.143), dimensions={}
+  %divide.258.5.clone.1 = f64[100]{0} divide(%multiply.256.7.clone.1, %broadcast.257.1.clone.1)
+  %multiply.259.3.clone.1 = f64[100]{0} multiply(%divide.258.5.clone.1, %param_0.206)
+  %add.260.1.clone.1 = f64[100]{0} add(%param_4.191, %multiply.259.3.clone.1)
+  %select.457.1.clone.1 = f64[100]{0} select(%compare.444.9, %add.260.1.clone.1, %param_4.191)
+  ROOT %tuple.9 = (f64[100]{0}, f64[100]{0}, f64[100]{0}) tuple(%select.455.1, %select.456.1.clone.1, %select.457.1.clone.1)
+}
+
+%command_buffer.4 (p.42: f64[100,56], p.43: f64[100,56], p.44: f64[100], p.45: f64[], p.46: f64[100], p.47: f64[100,56], p.48: pred[56], p.49: f64[56,100], p.50: f64[100,56], p.51: f64[100,56], p.52: f64[100,56], p.53: f64[56,100], p.54: f64[56,100], p.55: f64[], p.56: f64[100,56], p.57: f64[56,100], p.58: f64[100], p.59: s32[56], p.60: f64[100], p.61: f64[100], p.62: f64[], p.63: f64[56,100]) -> (f64[100,56], f64[100,56], f64[100,56], f64[100,56], f64[100,56], /*index=5*/(f64[100], f64[100], f64[100])) {
+  %p.42 = f64[100,56]{1,0} parameter(0)
+  %p.43 = f64[100,56]{1,0} parameter(1)
+  %p.44 = f64[100]{0} parameter(2)
+  %p.45 = f64[] parameter(3)
+  %p.46 = f64[100]{0} parameter(4)
+  %p.47 = f64[100,56]{1,0} parameter(5)
+  %p.48 = pred[56]{0} parameter(6)
+  %p.49 = f64[56,100]{0,1} parameter(7)
+  %p.50 = f64[100,56]{1,0} parameter(8)
+  %p.51 = f64[100,56]{1,0} parameter(9)
+  %p.52 = f64[100,56]{1,0} parameter(10)
+  %p.53 = f64[56,100]{0,1} parameter(11)
+  %p.54 = f64[56,100]{0,1} parameter(12)
+  %p.55 = f64[] parameter(13)
+  %p.56 = f64[100,56]{1,0} parameter(14)
+  %p.57 = f64[56,100]{0,1} parameter(15)
+  %p.58 = f64[100]{0} parameter(16)
+  %p.59 = s32[56]{0} parameter(17)
+  %p.60 = f64[100]{0} parameter(18)
+  %p.61 = f64[100]{0} parameter(19)
+  %p.62 = f64[] parameter(20)
+  %p.63 = f64[56,100]{1,0} parameter(21)
+  %copy.28 = f64[100,56]{1,0} copy(%p.42)
+  %copy.27 = f64[100,56]{1,0} copy(%p.43)
+  %loop_select_fusion.1 = (f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, /*index=5*/f64[100,56]{1,0}) fusion(%copy.28, %p.44, %p.45, %p.46, %p.47, /*index=5*/%p.48, %p.49, %p.50, %copy.27, %p.51, /*index=10*/%p.52, %p.53, %p.54, %p.55, %p.56, /*index=15*/%p.57, %p.58, %p.59, %p.60), kind=kLoop, calls=%fused_select.1
+  %get-tuple-element.100 = f64[100,56]{1,0} get-tuple-element(%loop_select_fusion.1), index=0
+  %get-tuple-element.31 = f64[100,56]{1,0} get-tuple-element(%loop_select_fusion.1), index=1
+  %get-tuple-element.99 = f64[100,56]{1,0} get-tuple-element(%loop_select_fusion.1), index=2
+  %get-tuple-element.98 = f64[100,56]{1,0} get-tuple-element(%loop_select_fusion.1), index=3
+  %get-tuple-element.96 = f64[100,56]{1,0} get-tuple-element(%loop_select_fusion.1), index=4
+  %get-tuple-element.97 = f64[100,56]{1,0} get-tuple-element(%loop_select_fusion.1), index=5
+  %input_reduce_fusion = f64[100]{0} fusion(%get-tuple-element.31), kind=kInput, calls=%fused_reduce
+  %loop_select_fusion = (f64[100]{0}, f64[100]{0}, f64[100]{0}) fusion(%p.46, %input_reduce_fusion, %p.44, %p.45, %p.61, /*index=5*/%p.62, %copy.28, %copy.27, %p.63), kind=kLoop, calls=%fused_select, control-predecessors={%loop_select_fusion.1}
+  ROOT %tuple.33 = (f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, /*index=5*/(f64[100]{0}, f64[100]{0}, f64[100]{0})) tuple(%get-tuple-element.100, %get-tuple-element.99, %get-tuple-element.98, %get-tuple-element.96, %get-tuple-element.97, /*index=5*/%loop_select_fusion)
+}
+
+%region_1.459 (arg_tuple.176: (f64[100,56], f64[100,56], f64[100,56], f64[100,56], f64[100,56], /*index=5*/f64[100], f64[100], f64[100], f64[], f64[56,100], /*index=10*/f64[], s32[56], f64[56,100], f64[100,56], f64[100], /*index=15*/pred[56], f64[56,100], f64[56,100], f64[100], f64[56,100], /*index=20*/f64[], f64[100,56])) -> (f64[100,56], f64[100,56], f64[100,56], f64[100,56], f64[100,56], /*index=5*/f64[100], f64[100], f64[100], f64[], f64[56,100], /*index=10*/f64[], s32[56], f64[56,100], f64[100,56], f64[100], /*index=15*/pred[56], f64[56,100], f64[56,100], f64[100], f64[56,100], /*index=20*/f64[], f64[100,56]) {
+  %arg_tuple.176 = (f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, /*index=5*/f64[100]{0}, f64[100]{0}, f64[100]{0}, f64[], f64[56,100]{1,0}, /*index=10*/f64[], s32[56]{0}, f64[56,100]{0,1}, f64[100,56]{1,0}, f64[100]{0}, /*index=15*/pred[56]{0}, f64[56,100]{0,1}, f64[56,100]{0,1}, f64[100]{0}, f64[56,100]{0,1}, /*index=20*/f64[], f64[100,56]{1,0}) parameter(0)
+  %get-tuple-element.117 = f64[100,56]{1,0} get-tuple-element(%arg_tuple.176), index=21
+  %get-tuple-element.116 = f64[] get-tuple-element(%arg_tuple.176), index=20
+  %get-tuple-element.115 = f64[56,100]{0,1} get-tuple-element(%arg_tuple.176), index=19
+  %get-tuple-element.114 = f64[100]{0} get-tuple-element(%arg_tuple.176), index=18
+  %get-tuple-element.113 = f64[56,100]{0,1} get-tuple-element(%arg_tuple.176), index=17
+  %get-tuple-element.112 = f64[56,100]{0,1} get-tuple-element(%arg_tuple.176), index=16
+  %get-tuple-element.111 = pred[56]{0} get-tuple-element(%arg_tuple.176), index=15
+  %get-tuple-element.110 = f64[100]{0} get-tuple-element(%arg_tuple.176), index=14
+  %get-tuple-element.109 = f64[100,56]{1,0} get-tuple-element(%arg_tuple.176), index=13
+  %get-tuple-element.108 = f64[56,100]{0,1} get-tuple-element(%arg_tuple.176), index=12
+  %get-tuple-element.107 = s32[56]{0} get-tuple-element(%arg_tuple.176), index=11
+  %get-tuple-element.106 = f64[] get-tuple-element(%arg_tuple.176), index=10
+  %get-tuple-element.105 = f64[56,100]{1,0} get-tuple-element(%arg_tuple.176), index=9
+  %get-tuple-element.104 = f64[] get-tuple-element(%arg_tuple.176), index=8
+  %get-tuple-element.81 = f64[100]{0} get-tuple-element(%arg_tuple.176), index=7
+  %get-tuple-element.80 = f64[100]{0} get-tuple-element(%arg_tuple.176), index=6
+  %get-tuple-element.79 = f64[100]{0} get-tuple-element(%arg_tuple.176), index=5
+  %get-tuple-element.78 = f64[100,56]{1,0} get-tuple-element(%arg_tuple.176), index=4
+  %get-tuple-element.77 = f64[100,56]{1,0} get-tuple-element(%arg_tuple.176), index=3
+  %get-tuple-element.76 = f64[100,56]{1,0} get-tuple-element(%arg_tuple.176), index=2
+  %get-tuple-element.75 = f64[100,56]{1,0} get-tuple-element(%arg_tuple.176), index=1
+  %get-tuple-element.74 = f64[100,56]{1,0} get-tuple-element(%arg_tuple.176), index=0
+  %call.2 = (f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, /*index=5*/(f64[100]{0}, f64[100]{0}, f64[100]{0})) call(%get-tuple-element.78, %get-tuple-element.77, %get-tuple-element.80, %get-tuple-element.104, %get-tuple-element.79, /*index=5*/%get-tuple-element.109, %get-tuple-element.111, %get-tuple-element.108, %get-tuple-element.117, %get-tuple-element.76, /*index=10*/%get-tuple-element.74, %get-tuple-element.112, %get-tuple-element.115, %get-tuple-element.116, %get-tuple-element.75, /*index=15*/%get-tuple-element.113, %get-tuple-element.114, %get-tuple-element.107, %get-tuple-element.110, %get-tuple-element.81, /*index=20*/%get-tuple-element.106, %get-tuple-element.105), to_apply=%command_buffer.4
+  %get-tuple-element.213 = f64[100,56]{1,0} get-tuple-element(%call.2), index=0
+  %get-tuple-element.214 = f64[100,56]{1,0} get-tuple-element(%call.2), index=1
+  %get-tuple-element.215 = f64[100,56]{1,0} get-tuple-element(%call.2), index=2
+  %get-tuple-element.216 = f64[100,56]{1,0} get-tuple-element(%call.2), index=3
+  %get-tuple-element.217 = f64[100,56]{1,0} get-tuple-element(%call.2), index=4
+  %get-tuple-element.218 = (f64[100]{0}, f64[100]{0}, f64[100]{0}) get-tuple-element(%call.2), index=5
+  %get-tuple-element.101 = f64[100]{0} get-tuple-element(%get-tuple-element.218), index=0
+  %get-tuple-element.102 = f64[100]{0} get-tuple-element(%get-tuple-element.218), index=1
+  %get-tuple-element.103 = f64[100]{0} get-tuple-element(%get-tuple-element.218), index=2
+  ROOT %tuple.20 = (f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, /*index=5*/f64[100]{0}, f64[100]{0}, f64[100]{0}, f64[], f64[56,100]{1,0}, /*index=10*/f64[], s32[56]{0}, f64[56,100]{0,1}, f64[100,56]{1,0}, f64[100]{0}, /*index=15*/pred[56]{0}, f64[56,100]{0,1}, f64[56,100]{0,1}, f64[100]{0}, f64[56,100]{0,1}, /*index=20*/f64[], f64[100,56]{1,0}) tuple(%get-tuple-element.216, %get-tuple-element.217, %get-tuple-element.215, %get-tuple-element.214, %get-tuple-element.213, /*index=5*/%get-tuple-element.101, %get-tuple-element.102, %get-tuple-element.103, %get-tuple-element.104, %get-tuple-element.105, /*index=10*/%get-tuple-element.106, %get-tuple-element.107, %get-tuple-element.108, %get-tuple-element.109, %get-tuple-element.110, /*index=15*/%get-tuple-element.111, %get-tuple-element.112, %get-tuple-element.113, %get-tuple-element.114, %get-tuple-element.115, /*index=20*/%get-tuple-element.116, %get-tuple-element.117)
+}
+
+%region_4.493 (Arg_0.490: pred[], Arg_1.491: pred[]) -> pred[] {
+  %Arg_1.491 = pred[] parameter(1)
+  %Arg_0.490 = pred[] parameter(0)
+  ROOT %or.492.0 = pred[] or(%Arg_0.490, %Arg_1.491)
+}
+
+%fused_reduce.1 (param_0.227: f64[100], param_1.298: f64[]) -> pred[] {
+  %param_1.298 = f64[] parameter(1)
+  %broadcast.486.7 = f64[100]{0} broadcast(%param_1.298), dimensions={}
+  %param_0.227 = f64[100]{0} parameter(0)
+  %subtract.487.7 = f64[100]{0} subtract(%broadcast.486.7, %param_0.227)
+  %abs.488.5 = f64[100]{0} abs(%subtract.487.7)
+  %constant_484_1 = f64[] constant(1e-05)
+  %broadcast.485.3 = f64[100]{0} broadcast(%constant_484_1), dimensions={}
+  %compare.489.3 = pred[100]{0} compare(%abs.488.5, %broadcast.485.3), direction=GT
+  %constant_483_1 = pred[] constant(false)
+  ROOT %reduce.494.1 = pred[] reduce(%compare.489.3, %constant_483_1), dimensions={0}, to_apply=%region_4.493
+}
+
+%region_3.495 (arg_tuple.460: (f64[100,56], f64[100,56], f64[100,56], f64[100,56], f64[100,56], /*index=5*/f64[100], f64[100], f64[100], f64[], f64[56,100], /*index=10*/f64[], s32[56], f64[56,100], f64[100,56], f64[100], /*index=15*/pred[56], f64[56,100], f64[56,100], f64[100], f64[56,100], /*index=20*/f64[], f64[100,56])) -> pred[] {
+  %arg_tuple.460 = (f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, /*index=5*/f64[100]{0}, f64[100]{0}, f64[100]{0}, f64[], f64[56,100]{1,0}, /*index=10*/f64[], s32[56]{0}, f64[56,100]{0,1}, f64[100,56]{1,0}, f64[100]{0}, /*index=15*/pred[56]{0}, f64[56,100]{0,1}, f64[56,100]{0,1}, f64[100]{0}, f64[56,100]{0,1}, /*index=20*/f64[], f64[100,56]{1,0}) parameter(0)
+  %get-tuple-element.467.0 = f64[100]{0} get-tuple-element(%arg_tuple.460), index=6
+  %get-tuple-element.469.0 = f64[] get-tuple-element(%arg_tuple.460), index=8
+  ROOT %input_reduce_fusion.1 = pred[] fusion(%get-tuple-element.467.0, %get-tuple-element.469.0), kind=kInput, calls=%fused_reduce.1
+}
+
+%copy_horizontally_fused_computation (param_0_0.2: f64[], param_1_0.2: f64[], param_2_0: f64[]) -> (f64[], f64[], f64[]) {
+  %param_0_0.2 = f64[] parameter(0)
+  %copy.47 = f64[] copy(%param_0_0.2)
+  %param_1_0.2 = f64[] parameter(1)
+  %copy.48 = f64[] copy(%param_1_0.2)
+  %param_2_0 = f64[] parameter(2)
+  %copy.49 = f64[] copy(%param_2_0)
+  ROOT %tuple.23 = (f64[], f64[], f64[]) tuple(%copy.47, %copy.48, %copy.49)
+}
+
+%fused_compare () -> pred[56] {
+  %iota.0.1 = s32[56]{0} iota(), iota_dimension=0
+  %constant_5_2 = s32[] constant(55)
+  %broadcast.20.1 = s32[56]{0} broadcast(%constant_5_2), dimensions={}
+  ROOT %compare.1.1 = pred[56]{0} compare(%iota.0.1, %broadcast.20.1), direction=EQ
+}
+
+%fused_clamp () -> s32[56] {
+  %constant_10_2 = s32[] constant(0)
+  %broadcast.26.1 = s32[56]{0} broadcast(%constant_10_2), dimensions={}
+  %iota.0.4 = s32[56]{0} iota(), iota_dimension=0
+  %constant_9_1 = s32[] constant(1)
+  %broadcast.27.3 = s32[56]{0} broadcast(%constant_9_1), dimensions={}
+  %add.0.3 = s32[56]{0} add(%iota.0.4, %broadcast.27.3)
+  %constant_5_1 = s32[] constant(55)
+  %broadcast.20.2 = s32[56]{0} broadcast(%constant_5_1), dimensions={}
+  ROOT %clamp.2 = s32[56]{0} clamp(%broadcast.26.1, %add.0.3, %broadcast.20.2)
+}
+
+%copy_horizontally_fused_computation.1 (param_1_0.3: f64[56,100], param_1_1.2: f64[56,100], param_1_2.1: f64[]) -> (f64[100], f64[100], f64[100], f64[100]) {
+  %constant_0_4 = f64[] constant(0)
+  %broadcast.39.2 = f64[100]{0} broadcast(%constant_0_4), dimensions={}
+  %param_1_0.3 = f64[56,100]{1,0} parameter(0)
+  %slice.1.3 = f64[1,100]{1,0} slice(%param_1_0.3), slice={[55:56], [0:100]}
+  %slice.2.3 = f64[1,100]{1,0} slice(%param_1_0.3), slice={[54:55], [0:100]}
+  %subtract.5.3 = f64[1,100]{1,0} subtract(%slice.1.3, %slice.2.3)
+  %reshape.48 = f64[100]{0} reshape(%subtract.5.3)
+  %concatenate.1 = f64[200]{0} concatenate(%broadcast.39.2, %reshape.48), dimensions={0}
+  %slice.6 = f64[100]{0} slice(%concatenate.1), slice={[0:100]}
+  %copy.50 = f64[100]{0} copy(%broadcast.39.2)
+  %param_1_2.1 = f64[] parameter(2)
+  %constant_16_3 = f64[] constant(4093)
+  %multiply.6.3 = f64[] multiply(%param_1_2.1, %constant_16_3)
+  %broadcast.79.3 = f64[1,100]{1,0} broadcast(%multiply.6.3), dimensions={}
+  %param_1_1.2 = f64[56,100]{1,0} parameter(1)
+  %slice.3.3 = f64[1,100]{1,0} slice(%param_1_1.2), slice={[55:56], [0:100]}
+  %divide.9.3 = f64[1,100]{1,0} divide(%broadcast.79.3, %slice.3.3)
+  %reshape.49 = f64[100]{0} reshape(%divide.9.3)
+  %concatenate.2 = f64[200]{0} concatenate(%copy.50, %reshape.49), dimensions={0}
+  %slice.8 = f64[100]{0} slice(%concatenate.2), slice={[0:100]}
+  %slice.7 = f64[100]{0} slice(%concatenate.1), slice={[100:200]}
+  %slice.9 = f64[100]{0} slice(%concatenate.2), slice={[100:200]}
+  ROOT %tuple.24 = (f64[100]{0}, f64[100]{0}, f64[100]{0}, f64[100]{0}) tuple(%slice.6, %slice.8, %slice.7, %slice.9)
+}
+
+%fused_transpose (param_0.305: f64[56,100], param_1.389: s32[56], param_2.266: pred[56]) -> f64[100,56] {
+  %param_2.266 = pred[56]{0} parameter(2)
+  %broadcast.87.1 = pred[100,56]{1,0} broadcast(%param_2.266), dimensions={1}
+  %constant_6_2 = f64[] constant(1)
+  %broadcast.88.1 = f64[100,56]{1,0} broadcast(%constant_6_2), dimensions={}
+  %param_0.305 = f64[56,100]{1,0} parameter(0)
+  %param_1.389 = s32[56]{0} parameter(1)
+  %constant_10_1 = s32[] constant(0)
+  %broadcast.26.2 = s32[56]{0} broadcast(%constant_10_1), dimensions={}
+  %compare.2.1 = pred[56]{0} compare(%param_1.389, %broadcast.26.2), direction=LT
+  %constant_11_1 = s32[] constant(56)
+  %broadcast.31.1 = s32[56]{0} broadcast(%constant_11_1), dimensions={}
+  %add.1.1 = s32[56]{0} add(%param_1.389, %broadcast.31.1)
+  %select.9.1 = s32[56]{0} select(%compare.2.1, %add.1.1, %param_1.389)
+  %bitcast.8.3 = s32[56,1]{1,0} bitcast(%select.9.1)
+  %gather.4.3 = f64[56,1,100]{0,2,1} gather(%param_0.305, %bitcast.8.3), offset_dims={1,2}, collapsed_slice_dims={}, start_index_map={0}, index_vector_dim=1, slice_sizes={1,100}
+  %bitcast.65.3 = f64[100,56]{1,0} bitcast(%gather.4.3)
+  %transpose.62.1 = f64[100,56]{1,0} transpose(%param_0.305), dimensions={1,0}
+  %subtract.6.3 = f64[100,56]{1,0} subtract(%bitcast.65.3, %transpose.62.1)
+  ROOT %select.16.1 = f64[100,56]{1,0} select(%broadcast.87.1, %broadcast.88.1, %subtract.6.3)
+}
+
+%fused_transpose.1 (param_0.306: f64[56,100]) -> f64[100,56] {
+  %param_0.306 = f64[56,100]{1,0} parameter(0)
+  %transpose.59.1 = f64[100,56]{1,0} transpose(%param_0.306), dimensions={1,0}
+  %constant_0_1 = f64[] constant(0)
+  %broadcast.83.1 = f64[100,56]{1,0} broadcast(%constant_0_1), dimensions={}
+  ROOT %maximum.3.1 = f64[100,56]{1,0} maximum(%transpose.59.1, %broadcast.83.1)
+}
+
+%wrapped_transpose_computation.2 (param_0.318: f64[56,100]) -> f64[100,56] {
+  %param_0.318 = f64[56,100]{1,0} parameter(0)
+  ROOT %transpose.2.1 = f64[100,56]{1,0} transpose(%param_0.318), dimensions={1,0}
+}
+
+%wrapped_transpose_computation.1 (param_0.317: f64[56,100]) -> f64[100,56] {
+  %param_0.317 = f64[56,100]{1,0} parameter(0)
+  ROOT %transpose.1.1 = f64[100,56]{1,0} transpose(%param_0.317), dimensions={1,0}
+}
+
+%wrapped_transpose_computation (param_0.316: f64[56,100]) -> f64[100,56] {
+  %param_0.316 = f64[56,100]{1,0} parameter(0)
+  ROOT %transpose.0.1 = f64[100,56]{1,0} transpose(%param_0.316), dimensions={1,0}
+}
+
+%wrapped_transpose_computation.3 (param_0.319: f64[56,100]) -> f64[100,56] {
+  %param_0.319 = f64[56,100]{1,0} parameter(0)
+  ROOT %transpose.60.1 = f64[100,56]{1,0} transpose(%param_0.319), dimensions={1,0}
+}
+
+%fused_divide_transpose (param_0.297: f64[], param_1.392: f64[56,100], param_2.268: f64[56,100], param_3.218: f64[56,100]) -> (f64[56,100], f64[100,56], f64[100,56]) {
+  %constant_15_1 = f64[] constant(3.8)
+  %broadcast.41.1 = f64[56,100]{1,0} broadcast(%constant_15_1), dimensions={}
+  %param_1.392 = f64[56,100]{1,0} parameter(1)
+  %param_2.268 = f64[56,100]{1,0} parameter(2)
+  %param_3.218 = f64[56,100]{1,0} parameter(3)
+  %divide.2.1 = f64[56,100]{1,0} divide(%param_2.268, %param_3.218)
+  %power.1.1 = f64[56,100]{1,0} power(%param_1.392, %divide.2.1)
+  %param_0.297 = f64[] parameter(0)
+  %broadcast.43.1 = f64[56,100]{1,0} broadcast(%param_0.297), dimensions={}
+  %multiply.5.1 = f64[56,100]{1,0} multiply(%power.1.1, %broadcast.43.1)
+  %divide.3.1 = f64[56,100]{1,0} divide(%broadcast.41.1, %multiply.5.1)
+  %transpose.65.1 = f64[100,56]{1,0} transpose(%param_2.268), dimensions={1,0}
+  %transpose.63.1 = f64[100,56]{1,0} transpose(%param_1.392), dimensions={1,0}
+  ROOT %tuple.11 = (f64[56,100]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}) tuple(%divide.3.1, %transpose.65.1, %transpose.63.1)
+}
+
+%wrapped_transpose_computation.4 (param_0.320: f64[56,100]) -> f64[100,56] {
+  %param_0.320 = f64[56,100]{1,0} parameter(0)
+  ROOT %transpose.64.1 = f64[100,56]{1,0} transpose(%param_0.320), dimensions={1,0}
+}
+
+%fused_multiply_select_sqrt (param_0.312: f64[100,56], param_1.397: f64[], param_2.274: pred[56], param_3.224: f64[100,56], param_4.195: f64[100,56], param_5.153: f64[56,100]) -> (f64[100,56], f64[100,56], f64[100,56], f64[100,56]) {
+  %param_5.153 = f64[56,100]{1,0} parameter(5)
+  %slice.0.3.clone.1 = f64[1,100]{1,0} slice(%param_5.153), slice={[0:1], [0:100]}
+  %bitcast.7.5.clone.1 = f64[100]{0} bitcast(%slice.0.3.clone.1)
+  %broadcast.84.5.clone.1 = f64[100,56]{1,0} broadcast(%bitcast.7.5.clone.1), dimensions={0}
+  %param_4.195 = f64[100,56]{1,0} parameter(4)
+  %divide.11.3.clone.1 = f64[100,56]{1,0} divide(%broadcast.84.5.clone.1, %param_4.195)
+  %sqrt.2.1.clone.1 = f64[100,56]{1,0} sqrt(%divide.11.3.clone.1)
+  %constant_1_1_clone_1 = f64[] constant(36.34)
+  %broadcast.15.1.clone.1 = f64[100,56]{1,0} broadcast(%constant_1_1_clone_1), dimensions={}
+  %multiply.0.1.clone.1 = f64[100,56]{1,0} multiply(%sqrt.2.1.clone.1, %broadcast.15.1.clone.1)
+  %param_3.224 = f64[100,56]{1,0} parameter(3)
+  %constant_2_2_clone_1 = f64[] constant(0.001)
+  %broadcast.85.3.clone.1 = f64[100,56]{1,0} broadcast(%constant_2_2_clone_1), dimensions={}
+  %multiply.19.3.clone.1 = f64[100,56]{1,0} multiply(%param_4.195, %broadcast.85.3.clone.1)
+  %multiply.20.1.clone.1 = f64[100,56]{1,0} multiply(%param_3.224, %multiply.19.3.clone.1)
+  %constant_3_1_clone_1 = f64[] constant(0.1364)
+  %broadcast.86.1.clone.1 = f64[100,56]{1,0} broadcast(%constant_3_1_clone_1), dimensions={}
+  %power.2.1.clone.1 = f64[100,56]{1,0} power(%multiply.20.1.clone.1, %broadcast.86.1.clone.1)
+  %multiply.3.1.clone.1 = f64[100,56]{1,0} multiply(%multiply.0.1.clone.1, %power.2.1.clone.1)
+  %abs.0.3 = f64[100,56]{1,0} abs(%multiply.3.1.clone.1)
+  %constant_4_1 = f64[] constant(1e-12)
+  %broadcast.19.3 = f64[100,56]{1,0} broadcast(%constant_4_1), dimensions={}
+  %compare.0.3 = pred[100,56]{1,0} compare(%abs.0.3, %broadcast.19.3), direction=GT
+  %param_2.274 = pred[56]{0} parameter(2)
+  %not.0.1 = pred[56]{0} not(%param_2.274)
+  %broadcast.22.1 = pred[100,56]{1,0} broadcast(%not.0.1), dimensions={1}
+  %and.0.1 = pred[100,56]{1,0} and(%compare.0.3, %broadcast.22.1)
+  %param_0.312 = f64[100,56]{1,0} parameter(0)
+  %constant_12_1 = f64[] constant(0.8)
+  %broadcast.33.1 = f64[100,56]{1,0} broadcast(%constant_12_1), dimensions={}
+  %multiply.4.1 = f64[100,56]{1,0} multiply(%param_0.312, %broadcast.33.1)
+  %constant_6_1 = f64[] constant(1)
+  %broadcast.88.2 = f64[100,56]{1,0} broadcast(%constant_6_1), dimensions={}
+  %select.11.1 = f64[100,56]{1,0} select(%compare.0.3, %multiply.3.1.clone.1, %broadcast.88.2)
+  %divide.1.1 = f64[100,56]{1,0} divide(%multiply.4.1, %select.11.1)
+  %param_1.397 = f64[] parameter(1)
+  %broadcast.37.1 = f64[100,56]{1,0} broadcast(%param_1.397), dimensions={}
+  %select.12.1 = f64[100,56]{1,0} select(%and.0.1, %divide.1.1, %broadcast.37.1)
+  ROOT %tuple.15 = (f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}) tuple(%select.12.1, %multiply.3.1.clone.1, %sqrt.2.1.clone.1, %multiply.19.3.clone.1)
+}
+
+%region_0.159.clone (Arg_0.2: f64[], Arg_1.1: f64[]) -> f64[] {
+  %Arg_1.1 = f64[] parameter(1)
+  %Arg_0.2 = f64[] parameter(0)
+  ROOT %minimum.3.0 = f64[] minimum(%Arg_0.2, %Arg_1.1)
+}
+
+%fused_reduce.2 (param_0.308: f64[100,56]) -> f64[100] {
+  %param_0.308 = f64[100,56]{1,0} parameter(0)
+  %constant_13_1 = f64[] constant(inf)
+  ROOT %reduce.0.1 = f64[100]{0} reduce(%param_0.308, %constant_13_1), dimensions={1}, to_apply=%region_0.159.clone
+}
+
+%region_5.527 (Arg_0.524: s32[], Arg_1.525: s32[]) -> s32[] {
+  %Arg_1.525 = s32[] parameter(1)
+  %Arg_0.524 = s32[] parameter(0)
+  ROOT %maximum.526.0 = s32[] maximum(%Arg_0.524, %Arg_1.525)
+}
+
+%fused_minimum_reduce (param_0.311: f64[], param_1.396: f64[100]) -> (s32[], f64[100]) {
+  %param_0.311 = f64[] parameter(0)
+  %broadcast.18.1.clone.1 = f64[100]{0} broadcast(%param_0.311), dimensions={}
+  %param_1.396 = f64[100]{0} parameter(1)
+  %minimum.2.1.clone.1 = f64[100]{0} minimum(%broadcast.18.1.clone.1, %param_1.396)
+  %constant_4_2 = f64[] constant(1e-12)
+  %broadcast.57.3 = f64[100]{0} broadcast(%constant_4_2), dimensions={}
+  %compare.3.3 = pred[100]{0} compare(%minimum.2.1.clone.1, %broadcast.57.3), direction=LT
+  %constant_9_2 = s32[] constant(1)
+  %broadcast.59.3 = s32[100]{0} broadcast(%constant_9_2), dimensions={}
+  %constant_0_3 = f64[] constant(0)
+  %compare.4.3 = pred[] compare(%param_0.311, %constant_0_3), direction=LE
+  %constant_22_1 = s64[] constant(1)
+  %constant_8_1 = s64[] constant(0)
+  %select.13.3 = s64[] select(%compare.4.3, %constant_22_1, %constant_8_1)
+  %convert.6.3 = s32[] convert(%select.13.3)
+  %broadcast.61.3 = s32[100]{0} broadcast(%convert.6.3), dimensions={}
+  %select.14.3 = s32[100]{0} select(%compare.3.3, %broadcast.59.3, %broadcast.61.3)
+  %constant_24_1 = s32[] constant(-2147483648)
+  %reduce.1.1 = s32[] reduce(%select.14.3, %constant_24_1), dimensions={0}, to_apply=%region_5.527
+  ROOT %tuple.12 = (s32[], f64[100]{0}) tuple(%reduce.1.1, %minimum.2.1.clone.1)
+}
+
+%command_buffer (p: f64[], p.1: f64[], p.2: f64[], p.3: f64[56,100], p.4: f64[56,100], p.5: f64[56,100], p.6: f64[56,100], p.7: f64[56,100], p.8: f64[56,100], p.9: f64[56,100], p.10: f64[56,100], p.11: f64[56,100], p.12: f64[]) -> (f64[], f64[], f64[], pred[56], s32[56], /*index=5*/f64[100], f64[100], f64[100], f64[100], f64[100,56], /*index=10*/f64[100,56], f64[100,56], f64[100,56], f64[100,56], f64[56,100], /*index=15*/f64[56,100], f64[56,100], f64[56,100], f64[100,56], f64[100,56], /*index=20*/f64[56,100], (s32[], f64[100])) {
+  %p = f64[] parameter(0)
+  %p.1 = f64[] parameter(1)
+  %p.2 = f64[] parameter(2)
+  %p.3 = f64[56,100]{1,0} parameter(3)
+  %p.4 = f64[56,100]{1,0} parameter(4)
+  %p.5 = f64[56,100]{1,0} parameter(5)
+  %p.6 = f64[56,100]{1,0} parameter(6)
+  %p.7 = f64[56,100]{1,0} parameter(7)
+  %p.8 = f64[56,100]{1,0} parameter(8)
+  %p.9 = f64[56,100]{1,0} parameter(9)
+  %p.10 = f64[56,100]{1,0} parameter(10)
+  %p.11 = f64[56,100]{1,0} parameter(11)
+  %p.12 = f64[] parameter(12)
+  %copy_fusion = (f64[], f64[], f64[]) fusion(%p, %p.1, %p.2), kind=kLoop, calls=%copy_horizontally_fused_computation
+  %get-tuple-element.130 = f64[] get-tuple-element(%copy_fusion), index=0
+  %get-tuple-element.131 = f64[] get-tuple-element(%copy_fusion), index=1
+  %get-tuple-element.132 = f64[] get-tuple-element(%copy_fusion), index=2
+  %bitcast.219 = f64[] bitcast(%get-tuple-element.132)
+  %bitcast.218 = f64[] bitcast(%get-tuple-element.131)
+  %bitcast.217 = f64[] bitcast(%get-tuple-element.130)
+  %loop_compare_fusion = pred[56]{0} fusion(), kind=kLoop, calls=%fused_compare
+  %loop_clamp_fusion = s32[56]{0} fusion(), kind=kLoop, calls=%fused_clamp
+  %copy_fusion.1 = (f64[100]{0}, f64[100]{0}, f64[100]{0}, f64[100]{0}) fusion(%p.3, %p.4, %p), kind=kInput, calls=%copy_horizontally_fused_computation.1
+  %get-tuple-element.133 = f64[100]{0} get-tuple-element(%copy_fusion.1), index=0
+  %get-tuple-element.134 = f64[100]{0} get-tuple-element(%copy_fusion.1), index=1
+  %get-tuple-element.135 = f64[100]{0} get-tuple-element(%copy_fusion.1), index=2
+  %get-tuple-element.136 = f64[100]{0} get-tuple-element(%copy_fusion.1), index=3
+  %bitcast.221 = f64[1,100]{1,0} bitcast(%get-tuple-element.136)
+  %bitcast.220 = f64[1,100]{1,0} bitcast(%get-tuple-element.135)
+  %tuple.25 = (f64[100]{0}, f64[100]{0}) tuple(%get-tuple-element.133, %get-tuple-element.134)
+  %get-tuple-element.129 = f64[100]{0} get-tuple-element(%tuple.25), index=1
+  %get-tuple-element.128 = f64[100]{0} get-tuple-element(%tuple.25), index=0
+  %tuple.26 = (f64[1,100]{1,0}, f64[1,100]{1,0}) tuple(%bitcast.220, %bitcast.221)
+  %get-tuple-element.50 = f64[1,100]{1,0} get-tuple-element(%tuple.26), index=0
+  %get-tuple-element.51 = f64[1,100]{1,0} get-tuple-element(%tuple.26), index=1
+  %bitcast.10.0 = f64[100]{0} bitcast(%get-tuple-element.50)
+  %bitcast.11.0 = f64[100]{0} bitcast(%get-tuple-element.51)
+  %input_transpose_fusion = f64[100,56]{1,0} fusion(%p.3, %loop_clamp_fusion, %loop_compare_fusion), kind=kInput, calls=%fused_transpose
+  %input_transpose_fusion.1 = f64[100,56]{1,0} fusion(%p.5), kind=kInput, calls=%fused_transpose.1
+  %wrapped_transpose.2 = f64[100,56]{1,0} fusion(%p.6), kind=kInput, calls=%wrapped_transpose_computation.2
+  %wrapped_transpose.1 = f64[100,56]{1,0} fusion(%p.7), kind=kInput, calls=%wrapped_transpose_computation.1
+  %wrapped_transpose = f64[100,56]{1,0} fusion(%p.8), kind=kInput, calls=%wrapped_transpose_computation
+  %wrapped_transpose.3 = f64[100,56]{1,0} fusion(%p.9), kind=kInput, calls=%wrapped_transpose_computation.3
+  %loop_divide_transpose_fusion = (f64[56,100]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}) fusion(%p.1, %p.10, %p.4, %p.11), kind=kLoop, calls=%fused_divide_transpose
+  %get-tuple-element.39 = f64[56,100]{1,0} get-tuple-element(%loop_divide_transpose_fusion), index=0
+  %get-tuple-element.40 = f64[100,56]{1,0} get-tuple-element(%loop_divide_transpose_fusion), index=1
+  %get-tuple-element.41 = f64[100,56]{1,0} get-tuple-element(%loop_divide_transpose_fusion), index=2
+  %bitcast.192.0 = f64[56,100]{0,1} bitcast(%get-tuple-element.40)
+  %bitcast.188.0 = f64[56,100]{0,1} bitcast(%get-tuple-element.41)
+  %wrapped_transpose.4 = f64[100,56]{1,0} fusion(%get-tuple-element.39), kind=kInput, calls=%wrapped_transpose_computation.4
+  %bitcast.190.0 = f64[56,100]{0,1} bitcast(%wrapped_transpose.4)
+  %loop_multiply_select_sqrt_fusion = (f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}) fusion(%input_transpose_fusion, %p.12, %loop_compare_fusion, %input_transpose_fusion.1, %wrapped_transpose.3, /*index=5*/%p.9), kind=kLoop, calls=%fused_multiply_select_sqrt
+  %get-tuple-element.44 = f64[100,56]{1,0} get-tuple-element(%loop_multiply_select_sqrt_fusion), index=0
+  %get-tuple-element.56 = f64[100,56]{1,0} get-tuple-element(%loop_multiply_select_sqrt_fusion), index=1
+  %get-tuple-element.73 = f64[100,56]{1,0} get-tuple-element(%loop_multiply_select_sqrt_fusion), index=2
+  %get-tuple-element.47 = f64[100,56]{1,0} get-tuple-element(%loop_multiply_select_sqrt_fusion), index=3
+  %bitcast.186.0 = f64[56,100]{0,1} bitcast(%get-tuple-element.47)
+  %input_reduce_fusion.2 = f64[100]{0} fusion(%get-tuple-element.44), kind=kInput, calls=%fused_reduce.2
+  %input_minimum_reduce_fusion = (s32[], f64[100]{0}) fusion(%p.12, %input_reduce_fusion.2), kind=kInput, calls=%fused_minimum_reduce
+  ROOT %tuple.27 = (f64[], f64[], f64[], pred[56]{0}, s32[56]{0}, /*index=5*/f64[100]{0}, f64[100]{0}, f64[100]{0}, f64[100]{0}, f64[100,56]{1,0}, /*index=10*/f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[56,100]{1,0}, /*index=15*/f64[56,100]{0,1}, f64[56,100]{0,1}, f64[56,100]{0,1}, f64[100,56]{1,0}, f64[100,56]{1,0}, /*index=20*/f64[56,100]{0,1}, (s32[], f64[100]{0})) tuple(%bitcast.219, %bitcast.218, %bitcast.217, %loop_compare_fusion, %loop_clamp_fusion, /*index=5*/%get-tuple-element.129, %get-tuple-element.128, %bitcast.10.0, %bitcast.11.0, %input_transpose_fusion, /*index=10*/%input_transpose_fusion.1, %wrapped_transpose.2, %wrapped_transpose.1, %wrapped_transpose, %get-tuple-element.39, /*index=15*/%bitcast.192.0, %bitcast.188.0, %bitcast.190.0, %get-tuple-element.56, %get-tuple-element.73, /*index=20*/%bitcast.186.0, %input_minimum_reduce_fusion)
+}
+
+%wrapped_transpose_computation.5 (param_0.321: f64[100,56]) -> f64[56,100] {
+  %param_0.321 = f64[100,56]{1,0} parameter(0)
+  ROOT %transpose.8.1 = f64[56,100]{1,0} transpose(%param_0.321), dimensions={1,0}
+}
+
+%wrapped_transpose_computation.6 (param_0.322: f64[100,56]) -> f64[56,100] {
+  %param_0.322 = f64[100,56]{1,0} parameter(0)
+  ROOT %transpose.9.1 = f64[56,100]{1,0} transpose(%param_0.322), dimensions={1,0}
+}
+
+%fused_slice (param_0_0: f64[100], param_0_1: f64[], param_1_0: f64[56,100], param_1_1: f64[56,100], param_1_2: f64[56,100], param_1_3: f64[56,100]) -> (f64[100], f64[5600]) {
+  %param_0_0 = f64[100]{0} parameter(0)
+  %param_0_1 = f64[] parameter(1)
+  %broadcast.18.3 = f64[100]{0} broadcast(%param_0_1), dimensions={}
+  %divide.5.2 = f64[100]{0} divide(%param_0_0, %broadcast.18.3)
+  %param_1_0 = f64[56,100]{1,0} parameter(2)
+  %param_1_1 = f64[56,100]{1,0} parameter(3)
+  %param_1_2 = f64[56,100]{1,0} parameter(4)
+  %param_1_3 = f64[56,100]{1,0} parameter(5)
+  %multiply.21.6 = f64[56,100]{1,0} multiply(%param_1_2, %param_1_3)
+  %constant_36_2 = f64[] constant(-273)
+  %broadcast.89.6 = f64[56,100]{1,0} broadcast(%constant_36_2), dimensions={}
+  %add.8.6 = f64[56,100]{1,0} add(%multiply.21.6, %broadcast.89.6)
+  %constant_18_2 = f64[] constant(17.27)
+  %broadcast.90.6 = f64[56,100]{1,0} broadcast(%constant_18_2), dimensions={}
+  %multiply.22.6 = f64[56,100]{1,0} multiply(%add.8.6, %broadcast.90.6)
+  %constant_38_2 = f64[] constant(-36)
+  %broadcast.92.6 = f64[56,100]{1,0} broadcast(%constant_38_2), dimensions={}
+  %add.9.6 = f64[56,100]{1,0} add(%multiply.21.6, %broadcast.92.6)
+  %divide.12.6 = f64[56,100]{1,0} divide(%multiply.22.6, %add.9.6)
+  %exponential.1.4 = f64[56,100]{1,0} exponential(%divide.12.6)
+  %multiply.23.2 = f64[56,100]{1,0} multiply(%param_1_1, %exponential.1.4)
+  %divide.13.2 = f64[56,100]{1,0} divide(%param_1_0, %multiply.23.2)
+  %constant_20_2 = f64[] constant(100)
+  %broadcast.93.2 = f64[56,100]{1,0} broadcast(%constant_20_2), dimensions={}
+  %multiply.24.2 = f64[56,100]{1,0} multiply(%divide.13.2, %broadcast.93.2)
+  %reshape.47 = f64[5600]{0} reshape(%multiply.24.2)
+  %concatenate = f64[5700]{0} concatenate(%divide.5.2, %reshape.47), dimensions={0}
+  %slice.4 = f64[100]{0} slice(%concatenate), slice={[0:100]}
+  %slice.5 = f64[5600]{0} slice(%concatenate), slice={[100:5700]}
+  ROOT %tuple.16 = (f64[100]{0}, f64[5600]{0}) tuple(%slice.4, %slice.5)
+}
+
+%wrapped_transpose_computation.8 (param_0.324: f64[100,56]) -> f64[56,100] {
+  %param_0.324 = f64[100,56]{1,0} parameter(0)
+  ROOT %transpose.11.1 = f64[56,100]{1,0} transpose(%param_0.324), dimensions={1,0}
+}
+
+%wrapped_transpose_computation.7 (param_0.323: f64[100,56]) -> f64[56,100] {
+  %param_0.323 = f64[100,56]{1,0} parameter(0)
+  ROOT %transpose.10.1 = f64[56,100]{1,0} transpose(%param_0.323), dimensions={1,0}
+}
+
+%command_buffer.2 (p.26: f64[100,56], p.27: f64[100,56], p.28: f64[100], p.29: f64[], p.30: f64[56,100], p.31: f64[56,100], p.32: f64[100,56], p.33: f64[100,56]) -> (f64[56,100], f64[56,100], f64[100], f64[56,100], f64[56,100], /*index=5*/f64[56,100]) {
+  %p.26 = f64[100,56]{1,0} parameter(0)
+  %p.27 = f64[100,56]{1,0} parameter(1)
+  %p.28 = f64[100]{0} parameter(2)
+  %p.29 = f64[] parameter(3)
+  %p.30 = f64[56,100]{1,0} parameter(4)
+  %p.31 = f64[56,100]{1,0} parameter(5)
+  %p.32 = f64[100,56]{1,0} parameter(6)
+  %p.33 = f64[100,56]{1,0} parameter(7)
+  %wrapped_transpose.5 = f64[56,100]{1,0} fusion(%p.26), kind=kInput, calls=%wrapped_transpose_computation.5
+  %wrapped_transpose.6 = f64[56,100]{1,0} fusion(%p.27), kind=kInput, calls=%wrapped_transpose_computation.6
+  %input_slice_fusion = (f64[100]{0}, f64[5600]{0}) fusion(%p.28, %p.29, %wrapped_transpose.6, %p.30, %p.31, /*index=5*/%wrapped_transpose.5), kind=kInput, calls=%fused_slice
+  %get-tuple-element.122 = f64[100]{0} get-tuple-element(%input_slice_fusion), index=0
+  %get-tuple-element.49 = f64[5600]{0} get-tuple-element(%input_slice_fusion), index=1
+  %bitcast.214 = f64[56,100]{1,0} bitcast(%get-tuple-element.49)
+  %wrapped_transpose.8 = f64[56,100]{1,0} fusion(%p.32), kind=kInput, calls=%wrapped_transpose_computation.8
+  %wrapped_transpose.7 = f64[56,100]{1,0} fusion(%p.33), kind=kInput, calls=%wrapped_transpose_computation.7
+  ROOT %tuple.31 = (f64[56,100]{1,0}, f64[56,100]{1,0}, f64[100]{0}, f64[56,100]{1,0}, f64[56,100]{1,0}, /*index=5*/f64[56,100]{1,0}) tuple(%wrapped_transpose.5, %wrapped_transpose.6, %get-tuple-element.122, %bitcast.214, %wrapped_transpose.8, /*index=5*/%wrapped_transpose.7)
+}
+
+ENTRY %main.543 (Arg_0.1: f64[56,100], Arg_1.2: f64[], Arg_2.3: f64[], Arg_3.4: f64[56,100], Arg_4.5: f64[], Arg_5.6: f64[56,100], Arg_6.7: f64[56,100], Arg_7.8: f64[56,100], Arg_8.9: f64[56,100], Arg_9.10: f64[56,100], Arg_10.11: f64[], Arg_11.12: f64[56,100], Arg_12.13: f64[56,100]) -> (f64[56,100], f64[56,100], f64[56,100], f64[56,100], f64[100], /*index=5*/f64[56,100], s32[], f64[], f64[], f64[]) {
+  %Arg_10.11 = f64[] parameter(10)
+  %Arg_4.5 = f64[] parameter(4)
+  %Arg_2.3 = f64[] parameter(2)
+  %Arg_1.2 = f64[] parameter(1)
+  %Arg_9.10 = f64[56,100]{1,0} parameter(9)
+  %Arg_12.13 = f64[56,100]{1,0} parameter(12)
+  %Arg_3.4 = f64[56,100]{1,0} parameter(3)
+  %Arg_0.1 = f64[56,100]{1,0} parameter(0)
+  %Arg_11.12 = f64[56,100]{1,0} parameter(11)
+  %Arg_8.9 = f64[56,100]{1,0} parameter(8)
+  %Arg_7.8 = f64[56,100]{1,0} parameter(7)
+  %Arg_6.7 = f64[56,100]{1,0} parameter(6)
+  %Arg_5.6 = f64[56,100]{1,0} parameter(5)
+  %call = (f64[], f64[], f64[], pred[56]{0}, s32[56]{0}, /*index=5*/f64[100]{0}, f64[100]{0}, f64[100]{0}, f64[100]{0}, f64[100,56]{1,0}, /*index=10*/f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[56,100]{1,0}, /*index=15*/f64[56,100]{0,1}, f64[56,100]{0,1}, f64[56,100]{0,1}, f64[100,56]{1,0}, f64[100,56]{1,0}, /*index=20*/f64[56,100]{0,1}, (s32[], f64[100]{0})) call(%Arg_2.3, %Arg_4.5, %Arg_10.11, %Arg_12.13, %Arg_0.1, /*index=5*/%Arg_6.7, %Arg_5.6, %Arg_7.8, %Arg_11.12, %Arg_9.10, /*index=10*/%Arg_3.4, %Arg_8.9, %Arg_1.2), to_apply=%command_buffer
+  %get-tuple-element.155 = f64[] get-tuple-element(%call), index=0
+  %get-tuple-element.156 = f64[] get-tuple-element(%call), index=1
+  %get-tuple-element.157 = f64[] get-tuple-element(%call), index=2
+  %get-tuple-element.158 = pred[56]{0} get-tuple-element(%call), index=3
+  %get-tuple-element.159 = s32[56]{0} get-tuple-element(%call), index=4
+  %get-tuple-element.160 = f64[100]{0} get-tuple-element(%call), index=5
+  %get-tuple-element.161 = f64[100]{0} get-tuple-element(%call), index=6
+  %get-tuple-element.162 = f64[100]{0} get-tuple-element(%call), index=7
+  %get-tuple-element.163 = f64[100]{0} get-tuple-element(%call), index=8
+  %get-tuple-element.164 = f64[100,56]{1,0} get-tuple-element(%call), index=9
+  %get-tuple-element.165 = f64[100,56]{1,0} get-tuple-element(%call), index=10
+  %get-tuple-element.166 = f64[100,56]{1,0} get-tuple-element(%call), index=11
+  %get-tuple-element.167 = f64[100,56]{1,0} get-tuple-element(%call), index=12
+  %get-tuple-element.168 = f64[100,56]{1,0} get-tuple-element(%call), index=13
+  %get-tuple-element.169 = f64[56,100]{1,0} get-tuple-element(%call), index=14
+  %get-tuple-element.170 = f64[56,100]{0,1} get-tuple-element(%call), index=15
+  %get-tuple-element.171 = f64[56,100]{0,1} get-tuple-element(%call), index=16
+  %get-tuple-element.172 = f64[56,100]{0,1} get-tuple-element(%call), index=17
+  %get-tuple-element.173 = f64[100,56]{1,0} get-tuple-element(%call), index=18
+  %get-tuple-element.174 = f64[100,56]{1,0} get-tuple-element(%call), index=19
+  %get-tuple-element.175 = f64[56,100]{0,1} get-tuple-element(%call), index=20
+  %get-tuple-element.176 = (s32[], f64[100]{0}) get-tuple-element(%call), index=21
+  %get-tuple-element.124 = s32[] get-tuple-element(%get-tuple-element.176), index=0
+  %get-tuple-element.57 = f64[100]{0} get-tuple-element(%get-tuple-element.176), index=1
+  %tuple.18 = (f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, /*index=5*/f64[100]{0}, f64[100]{0}, f64[100]{0}, f64[], f64[56,100]{1,0}, /*index=10*/f64[], s32[56]{0}, f64[56,100]{0,1}, f64[100,56]{1,0}, f64[100]{0}, /*index=15*/pred[56]{0}, f64[56,100]{0,1}, f64[56,100]{0,1}, f64[100]{0}, f64[56,100]{0,1}, /*index=20*/f64[], f64[100,56]{1,0}) tuple(%get-tuple-element.168, %get-tuple-element.167, %get-tuple-element.166, %get-tuple-element.165, %get-tuple-element.173, /*index=5*/%get-tuple-element.57, %get-tuple-element.161, %get-tuple-element.160, %Arg_1.2, %Arg_9.10, /*index=10*/%Arg_10.11, %get-tuple-element.159, %get-tuple-element.175, %get-tuple-element.164, %get-tuple-element.162, /*index=15*/%get-tuple-element.158, %get-tuple-element.171, %get-tuple-element.172, %get-tuple-element.163, %get-tuple-element.170, /*index=20*/%Arg_2.3, %get-tuple-element.174)
+  %while.0 = (f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, f64[100,56]{1,0}, /*index=5*/f64[100]{0}, f64[100]{0}, f64[100]{0}, f64[], f64[56,100]{1,0}, /*index=10*/f64[], s32[56]{0}, f64[56,100]{0,1}, f64[100,56]{1,0}, f64[100]{0}, /*index=15*/pred[56]{0}, f64[56,100]{0,1}, f64[56,100]{0,1}, f64[100]{0}, f64[56,100]{0,1}, /*index=20*/f64[], f64[100,56]{1,0}) while(%tuple.18), condition=%region_3.495, body=%region_1.459
+  %get-tuple-element.7.0 = f64[100]{0} get-tuple-element(%while.0), index=7
+  %get-tuple-element.6.0 = f64[100,56]{1,0} get-tuple-element(%while.0), index=3
+  %get-tuple-element.5.0 = f64[100,56]{1,0} get-tuple-element(%while.0), index=2
+  %get-tuple-element.3.0 = f64[100,56]{1,0} get-tuple-element(%while.0), index=0
+  %get-tuple-element.4.0 = f64[100,56]{1,0} get-tuple-element(%while.0), index=1
+  %call.1 = (f64[56,100]{1,0}, f64[56,100]{1,0}, f64[100]{0}, f64[56,100]{1,0}, f64[56,100]{1,0}, /*index=5*/f64[56,100]{1,0}) call(%get-tuple-element.3.0, %get-tuple-element.4.0, %get-tuple-element.7.0, %Arg_1.2, %get-tuple-element.169, /*index=5*/%Arg_3.4, %get-tuple-element.6.0, %get-tuple-element.5.0), to_apply=%command_buffer.2
+  %get-tuple-element.201 = f64[56,100]{1,0} get-tuple-element(%call.1), index=0
+  %get-tuple-element.202 = f64[56,100]{1,0} get-tuple-element(%call.1), index=1
+  %get-tuple-element.203 = f64[100]{0} get-tuple-element(%call.1), index=2
+  %get-tuple-element.204 = f64[56,100]{1,0} get-tuple-element(%call.1), index=3
+  %get-tuple-element.205 = f64[56,100]{1,0} get-tuple-element(%call.1), index=4
+  %get-tuple-element.206 = f64[56,100]{1,0} get-tuple-element(%call.1), index=5
+  ROOT %tuple.21 = (f64[56,100]{1,0}, f64[56,100]{1,0}, f64[56,100]{1,0}, f64[56,100]{1,0}, f64[100]{0}, /*index=5*/f64[56,100]{1,0}, s32[], f64[], f64[], f64[]) tuple(%get-tuple-element.201, %get-tuple-element.202, %get-tuple-element.206, %get-tuple-element.205, %get-tuple-element.203, /*index=5*/%get-tuple-element.204, %get-tuple-element.124, %get-tuple-element.157, %get-tuple-element.156, %get-tuple-element.155)
+}
+

@@ -1,0 +1,26 @@
+{
+  "stage": "completeness_check",
+  "timestamp": "2026-09-03T10:07:05.944854",
+  "total": 1,
+  "pass": 1,
+  "warn": 0,
+  "fail": 0,
+  "missing": 0,
+  "status": "PASS",
+  "results": [
+    {
+      "proc": "kessler_run",
+      "fortran_lines": 173,
+      "jax_lines": 309,
+      "jax_code_lines": 216,
+      "ratio": 1.249,
+      "scaffold_phrases": [],
+      "dead_calls": [],
+      "absent_calls": [],
+      "silent_stub": false,
+      "scalar_misclassified": false,
+      "low_ratio_advisory": false,
+      "verdict": "PASS"
+    }
+  ]
+}

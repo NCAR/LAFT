@@ -1,0 +1,74 @@
+# Citation metadata for this repository (Citation File Format 1.2.0).
+# GitHub renders this file in the "Cite this repository" menu.
+# Update `preferred-citation` with the arXiv identifier and, later, the
+# journal DOI once they are assigned.
+cff-version: 1.2.0
+message: >-
+  If you use this software or data, please cite both the repository and the
+  paper listed under preferred-citation.
+type: software
+version: 1.0.0
+date-released: "2026-09-10"
+title: "LAFT: LLM-Assisted Fortran Translation"
+abstract: >-
+  An agentic framework for translating legacy Fortran atmospheric physics
+  parameterizations into GPU-accelerated JAX, with automated translation,
+  error repair, validation against the Fortran reference, and hardware-level
+  profiling. This repository holds the framework and the Kessler warm-rain
+  microphysics case study with four large language models.
+authors:
+  - family-names: Gagne
+    given-names: David J.
+    affiliation: NSF National Center for Atmospheric Research
+  - family-names: Linck
+    given-names: Iris
+    email: ilinck@ucar.edu
+    affiliation: NSF National Center for Atmospheric Research
+  - family-names: Dennis
+    given-names: John
+    affiliation: NSF National Center for Atmospheric Research
+  - family-names: Schreck
+    given-names: John
+    affiliation: NSF National Center for Atmospheric Research
+  - family-names: Stengel
+    given-names: Karen
+    affiliation: NSF National Center for Atmospheric Research
+repository-code: https://github.com/NCAR/LAFT
+license: Apache-2.0
+keywords:
+  - Fortran
+  - JAX
+  - GPU
+  - large language models
+  - code translation
+  - atmospheric physics
+  - Kessler microphysics
+preferred-citation:
+  type: article
+  title: >-
+    Evaluating LLMs for Translating Legacy Fortran Atmospheric Physics to
+    GPU-Accelerated JAX
+  authors:
+    - family-names: Gagne
+      given-names: David J.
+      affiliation: NSF National Center for Atmospheric Research
+    - family-names: Linck
+      given-names: Iris
+      email: ilinck@ucar.edu
+      affiliation: NSF National Center for Atmospheric Research
+    - family-names: Dennis
+      given-names: John
+      affiliation: NSF National Center for Atmospheric Research
+    - family-names: Schreck
+      given-names: John
+      affiliation: NSF National Center for Atmospheric Research
+    - family-names: Stengel
+      given-names: Karen
+      affiliation: NSF National Center for Atmospheric Research
+  year: 2026
+  status: preprint
+  notes: >-
+    Preprint submitted to arXiv; manuscript submitted to the Journal of
+    Advances in Modeling Earth Systems (JAMES). Add the arXiv identifier
+    here (e.g. "identifiers: - type: other, value: arXiv:XXXX.XXXXX") and
+    the journal DOI once available.

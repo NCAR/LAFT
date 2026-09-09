@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-09-04T10:31:29.251378",
+  "procedures": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0
+  },
+  "checks": {
+    "total": 23,
+    "passed": 23,
+    "failed": 0,
+    "score": 100.0
+  },
+  "details": [
+    {
+      "proc": "kessler_init",
+      "passed": 9,
+      "failed": 0,
+      "score": 100.0,
+      "overall": "PASS"
+    },
+    {
+      "proc": "kessler_run",
+      "passed": 14,
+      "failed": 0,
+      "score": 100.0,
+      "overall": "PASS"
+    }
+  ]
+}

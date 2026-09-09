@@ -1,0 +1,97 @@
+{
+  "stage": "driver",
+  "mode": "host",
+  "status": "PASS",
+  "grid": {
+    "ncol": 128,
+    "nz": 56,
+    "dt": 60.0,
+    "seed": 0,
+    "lyr_surf": 1,
+    "lyr_toa": 56
+  },
+  "init": {
+    "ok": true,
+    "errflg": 0,
+    "errmsg": ""
+  },
+  "run": {
+    "ok": true,
+    "errflg": 0,
+    "errmsg": "",
+    "scheme_name": ""
+  },
+  "outputs": {
+    "theta": {
+      "written": true,
+      "shape": [
+        128,
+        56
+      ],
+      "finite": true,
+      "min": 249.87661608147113,
+      "max": 355.2160960338347
+    },
+    "qv": {
+      "written": true,
+      "shape": [
+        128,
+        56
+      ],
+      "finite": true,
+      "min": 8.3769808182357e-06,
+      "max": 0.026219504461923022
+    },
+    "qc": {
+      "written": true,
+      "shape": [
+        128,
+        56
+      ],
+      "finite": true,
+      "min": 0.0,
+      "max": 0.013923855129688712
+    },
+    "qr": {
+      "written": true,
+      "shape": [
+        128,
+        56
+      ],
+      "finite": true,
+      "min": 0.0,
+      "max": 0.025076729642538667
+    },
+    "precl": {
+      "written": true,
+      "shape": [
+        128
+      ],
+      "finite": true,
+      "min": 0.00012292790581049494,
+      "max": 0.00017775235969026446
+    },
+    "relhum": {
+      "written": true,
+      "shape": [
+        128,
+        56
+      ],
+      "finite": true,
+      "min": 0.9475105332459541,
+      "max": 100.00000000000044
+    }
+  },
+  "diagnostics": {
+    "mean_theta_change_K": -2.2125912793531604,
+    "max_cooling_K": -26.598729627028547,
+    "max_warming_K": 24.87511002346784,
+    "mean_qv_change_g_kg": 1.5743964236648957,
+    "mean_precip_mm_hr": 0.5059600593550883,
+    "max_precip_mm_hr": 0.639908494884952,
+    "columns_with_precip": 128,
+    "mean_relhum_pct": 79.77286509659288
+  },
+  "exception": null,
+  "timestamp": "2026-09-04T10:15:47.326287"
+}

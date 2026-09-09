@@ -1,0 +1,13 @@
+{
+  "proc_name": "kessler_init",
+  "unit_file": "out/procedures/kessler_init.F90",
+  "parent_module": "kessler",
+  "module_vars_used": [
+    "lv",
+    "pref",
+    "rhoqr"
+  ],
+  "fortran_source": "subroutine kessler_init(lv_in, pref_in, rhoqr_in, errmsg, errflg)\n      ! Set physical constants to be consistent with calling model\n      real(kind_phys),    intent(in)  :: lv_in    ! latent heat of vaporization, J/kg\n      real(kind_phys),    intent(in)  :: pref_in  ! reference pressure, Pa\n      real(kind_phys),    intent(in)  :: rhoqr_in ! density of fresh liquid water, kg/m^3\n\n      character(len=512), intent(out) :: errmsg\n      integer,            intent(out) :: errflg\n\n      errmsg = ''\n      errflg = 0\n\n      lv    = lv_in\n      pref  = pref_in/100._kind_phys\n      rhoqr = rhoqr_in\n\n   end subroutine kessler_init\n",
+  "openmp_directives_in_unit": [],
+  "skeleton": "subroutine kessler_init(lv_in, pref_in, rhoqr_in, errmsg, errflg)\n      real(kind_phys),    intent(in)  :: lv_in    ! latent heat of vaporization, J/kg\n      real(kind_phys),    intent(in)  :: pref_in  ! reference pressure, Pa\n      real(kind_phys),    intent(in)  :: rhoqr_in ! density of fresh liquid water, kg/m^3\n\n      character(len=512), intent(out) :: errmsg\n      integer,            intent(out) :: errflg\n\n      errmsg = <EXPR>\n      errflg = <EXPR>\n\n      lv = <EXPR>\n      pref = <EXPR>\n      rhoqr = <EXPR>\n\n   end subroutine kessler_init\n"
+}

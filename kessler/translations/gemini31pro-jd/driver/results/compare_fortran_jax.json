@@ -1,0 +1,264 @@
+{
+  "stage": "comparison",
+  "status": "PASS",
+  "timestamp": "2026-09-04T10:33:56.561616",
+  "grid": {
+    "ncol": 128,
+    "nz": 56,
+    "dt": 60.0,
+    "seed": 0
+  },
+  "invariants": {
+    "shapes_match": true,
+    "identity_self_test_passed": true,
+    "fortran_physics_all_pass": true,
+    "jax_physics_all_pass": true,
+    "outputs_fresh_vs_inputs": true,
+    "all_within_tolerance": true
+  },
+  "bitwise": {
+    "gated": false,
+    "note": "exact IEEE-754 bit comparison of the float64 outputs, reported as evidence; PASS/FAIL is set by the MAX_ABS_ERR_TOL gates",
+    "all_variables_bit_identical": false,
+    "worst_max_ulp_diff": 4221,
+    "per_variable": {
+      "theta": {
+        "bitwise_identical": false,
+        "n_total": 7168,
+        "n_bit_identical": 7076,
+        "n_differing": 92,
+        "frac_bit_identical": 0.9871651785714286,
+        "max_ulp_diff": 1,
+        "mean_ulp_diff": 0.012834821428571428,
+        "all_finite_both": true
+      },
+      "qv": {
+        "bitwise_identical": false,
+        "n_total": 7168,
+        "n_bit_identical": 6243,
+        "n_differing": 925,
+        "frac_bit_identical": 0.8709542410714286,
+        "max_ulp_diff": 40,
+        "mean_ulp_diff": 0.20772879464285715,
+        "all_finite_both": true
+      },
+      "qc": {
+        "bitwise_identical": false,
+        "n_total": 7168,
+        "n_bit_identical": 3557,
+        "n_differing": 3611,
+        "frac_bit_identical": 0.49623325892857145,
+        "max_ulp_diff": 4221,
+        "mean_ulp_diff": 4.536411830357143,
+        "all_finite_both": true
+      },
+      "qr": {
+        "bitwise_identical": false,
+        "n_total": 7168,
+        "n_bit_identical": 2421,
+        "n_differing": 4747,
+        "frac_bit_identical": 0.33775111607142855,
+        "max_ulp_diff": 313,
+        "mean_ulp_diff": 1.2141462053571428,
+        "all_finite_both": true
+      },
+      "precl": {
+        "bitwise_identical": false,
+        "n_total": 128,
+        "n_bit_identical": 64,
+        "n_differing": 64,
+        "frac_bit_identical": 0.5,
+        "max_ulp_diff": 4,
+        "mean_ulp_diff": 0.671875,
+        "all_finite_both": true
+      },
+      "relhum": {
+        "bitwise_identical": false,
+        "n_total": 7168,
+        "n_bit_identical": 4349,
+        "n_differing": 2819,
+        "frac_bit_identical": 0.6067243303571429,
+        "max_ulp_diff": 39,
+        "mean_ulp_diff": 0.7744140625,
+        "all_finite_both": true
+      }
+    },
+    "file_sha256": {
+      "theta": {
+        "fortran_sha256": "4bbef80dd6597343e7066d1b4ad09ea0e0a47073aeb3bdf5f0d53eb7a21cf70f",
+        "jax_sha256": "31156b90d7cdd01f82739d9d584b012f03b7d85edbbcb4bca5a1706a005aa141",
+        "identical": false
+      },
+      "qv": {
+        "fortran_sha256": "c3d0cc5577c57fdb25b330bfa06182fffde4289737fc5efb157942b0a76a68b7",
+        "jax_sha256": "d22741ad123a22582e0ea623e16d5c49c032f5297f82ef75230a6a0a7029f34c",
+        "identical": false
+      },
+      "qc": {
+        "fortran_sha256": "30461d63f173092587777aa42d702f9b65805ac6b450e046916fa68eb0014eab",
+        "jax_sha256": "143434cf0028a8b73438571dac4e8ce5593ec05d932e1271ffb3fc74e66ae353",
+        "identical": false
+      },
+      "qr": {
+        "fortran_sha256": "8dd75c6ccda0637079d678c641eefa3f18db0651ee0342a7c91df6d4630b9057",
+        "jax_sha256": "c0e02ec10417cdf3156320ac55e44d67ca03f4c07ad75da963562bf241582562",
+        "identical": false
+      },
+      "precl": {
+        "fortran_sha256": "0d6c6dce8047a4935a7217fddef87b3c3fa3a17073b26bda7c5dbaf657ff5c68",
+        "jax_sha256": "deeb37319071f78576dfae04c9e1f8109ddc0ff9a5a22430e28980843fd7e12f",
+        "identical": false
+      },
+      "relhum": {
+        "fortran_sha256": "a2f98b095bc59dfc219b8093a5daa538892fa6410c639b332184f5c92841c59b",
+        "jax_sha256": "f981d5e90980dd056283e29c01829b981841c1c6f6d3f773aff4e3230d8f580e",
+        "identical": false
+      }
+    },
+    "all_files_byte_identical": false
+  },
+  "self_test": {
+    "max_abs_err": 0.0,
+    "passed": true
+  },
+  "freshness": {
+    "inputs_mtime": 1784220484.4070697,
+    "fortran_mtime": 1784220484.443202,
+    "jax_mtime": 1788539589.158796
+  },
+  "shapes": {
+    "theta": {
+      "jax": [
+        128,
+        56
+      ],
+      "fortran": [
+        128,
+        56
+      ],
+      "match": true
+    },
+    "qv": {
+      "jax": [
+        128,
+        56
+      ],
+      "fortran": [
+        128,
+        56
+      ],
+      "match": true
+    },
+    "qc": {
+      "jax": [
+        128,
+        56
+      ],
+      "fortran": [
+        128,
+        56
+      ],
+      "match": true
+    },
+    "qr": {
+      "jax": [
+        128,
+        56
+      ],
+      "fortran": [
+        128,
+        56
+      ],
+      "match": true
+    },
+    "precl": {
+      "jax": [
+        128
+      ],
+      "fortran": [
+        128
+      ],
+      "match": true
+    },
+    "relhum": {
+      "jax": [
+        128,
+        56
+      ],
+      "fortran": [
+        128,
+        56
+      ],
+      "match": true
+    }
+  },
+  "physics": {
+    "fortran": {
+      "theta_200_400K": true,
+      "qv_nonneg": true,
+      "qc_nonneg": true,
+      "qr_nonneg": true,
+      "precl_nonneg": true,
+      "relhum_nonneg": true
+    },
+    "jax": {
+      "theta_200_400K": true,
+      "qv_nonneg": true,
+      "qc_nonneg": true,
+      "qr_nonneg": true,
+      "precl_nonneg": true,
+      "relhum_nonneg": true
+    }
+  },
+  "metrics": {
+    "theta": {
+      "mae": 7.2957513046796e-16,
+      "rmse": 6.439840427496547e-15,
+      "max_abs_err": 5.684341886080802e-14,
+      "rel_mae": 2.5414780828077687e-18,
+      "tol_max_abs_err": 1e-09,
+      "within_tol": true
+    },
+    "qv": {
+      "mae": 3.6849383730403e-19,
+      "rmse": 1.868715353470991e-18,
+      "max_abs_err": 6.245004513516506e-17,
+      "rel_mae": 3.123565605617547e-17,
+      "tol_max_abs_err": 1e-12,
+      "within_tol": true
+    },
+    "qc": {
+      "mae": 2.194116663468925e-19,
+      "rmse": 9.558818471371222e-19,
+      "max_abs_err": 2.8602608562883214e-17,
+      "rel_mae": 3.392003449669359e-16,
+      "tol_max_abs_err": 1e-12,
+      "within_tol": true
+    },
+    "qr": {
+      "mae": 2.429328468254906e-18,
+      "rmse": 3.6237636408397016e-18,
+      "max_abs_err": 2.0816681711721685e-17,
+      "rel_mae": 1.5268984324486783e-16,
+      "tol_max_abs_err": 1e-12,
+      "within_tol": true
+    },
+    "precl": {
+      "mae": 1.8211208365967457e-20,
+      "rmse": 2.8347144325000766e-20,
+      "max_abs_err": 1.0842021724855044e-19,
+      "rel_mae": 1.2957613729638663e-16,
+      "tol_max_abs_err": 1e-12,
+      "within_tol": true
+    },
+    "relhum": {
+      "mae": 7.582538267904481e-15,
+      "rmse": 1.786331990630319e-14,
+      "max_abs_err": 4.121147867408581e-13,
+      "rel_mae": 9.50515975416349e-17,
+      "tol_max_abs_err": 1e-09,
+      "within_tol": true
+    }
+  },
+  "exception": null
+}

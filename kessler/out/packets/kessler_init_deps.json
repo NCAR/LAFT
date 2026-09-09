@@ -1,0 +1,39 @@
+{
+  "proc_name": "kessler_init",
+  "scalar_only": true,
+  "scalar_out_args": [],
+  "args": [
+    "lv_in",
+    "pref_in",
+    "rhoqr_in",
+    "errmsg",
+    "errflg"
+  ],
+  "calls": [],
+  "reads": [
+    "lv_in",
+    "pref_in",
+    "rhoqr_in"
+  ],
+  "writes": [
+    "errflg",
+    "errmsg",
+    "lv",
+    "pref",
+    "rhoqr"
+  ],
+  "writes_to_args": [
+    "errflg",
+    "errmsg"
+  ],
+  "syntax_ok": true,
+  "unit_file": "out/procedures/kessler_init.F90",
+  "effects": {
+    "has_io": false,
+    "has_external_io": false,
+    "has_internal_error_write": false,
+    "io_hits_external": [],
+    "io_hits_internal": []
+  },
+  "jax_required": false
+}

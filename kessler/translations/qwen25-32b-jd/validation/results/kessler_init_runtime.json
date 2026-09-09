@@ -1,0 +1,16 @@
+{
+  "proc": "kessler_init",
+  "imported": true,
+  "wrapper_called": true,
+  "core_jit_called": false,
+  "wrapper_ok": true,
+  "core_ok": true,
+  "wrapper_exception": null,
+  "core_exception": null,
+  "wrapper_finite": true,
+  "core_finite": null,
+  "notes": [
+    "Wrapper validation uses bridge (kessler_init_bridge) with Fortran-layout inputs.",
+    "Scalar-only procedure: no _core expected. Skipping JIT validation."
+  ]
+}

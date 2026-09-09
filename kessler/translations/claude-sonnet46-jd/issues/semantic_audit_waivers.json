@@ -1,0 +1,23 @@
+{
+  "_comment": [
+    "Waived semantic-audit findings. Format: {proc: {check: [names]}}.",
+    "These are judgments about the FORTRAN and the framework's checker",
+    "heuristics, not about any one LLM's translation, so they apply to every",
+    "translator. Restored 2026-07-22 after tools/clean_AI_results.sh removed",
+    "this file during the LLM switch.",
+    "kessler_run/intent-out precl: the checker cannot see through jax.vmap",
+    "into process_one_col, where precl is computed fresh each call as",
+    "precl_acc/dt with precl_acc initialised to 0.0 inside the column",
+    "function. No value carries over between calls, so the accumulation risk",
+    "the check warns about cannot occur.",
+    "kessler_run/intent-out relhum: same blind spot; relhum is a pure",
+    "diagnostic recomputed after the subcycle loop as qv/qvs*100 from the",
+    "final state (kessler.F90:369-376), never read from its incoming value.",
+    "kessler_run/zero-forever precl: same computation seen from the other",
+    "direction - the top-level name is only ever bound from the vmap result."
+  ],
+  "kessler_run": {
+    "intent-out": ["precl", "relhum"],
+    "zero-forever": ["precl"]
+  }
+}

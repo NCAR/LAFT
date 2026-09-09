@@ -1,0 +1,43 @@
+HloModule jit_f, is_scheduled=true, entry_computation_layout={(f64[56,1000]{1,0}, s64[10]{0}, f64[10,1000]{1,0})->f64[56,1000]{1,0}}, allow_spmd_sharding_propagation_to_parameters={true,true,true}, allow_spmd_sharding_propagation_to_output={true}, frontend_attributes={fingerprint_before_lhs="419d5f8a269b08fcae8b4f460229e9fb"}
+
+%region_0.19 (Arg_0.17: f64[], Arg_1.18: f64[]) -> f64[] {
+  ROOT %Arg_1.18 = f64[] parameter(1), metadata={op_name="jit(f)/jit(main)/scatter"}
+  %Arg_0.17 = f64[] parameter(0), metadata={op_name="jit(f)/jit(main)/scatter"}
+}
+
+%fused_scatter (param_0: f64[56,1000], param_1.1: f64[10,1000], param_2.11: s64[10]) -> f64[56,1000] {
+  %param_0 = f64[56,1000]{1,0} parameter(0)
+  %param_2.11 = s64[10]{0} parameter(2)
+  %constant_10_1 = s64[] constant(0)
+  %broadcast.11.1 = s64[10]{0} broadcast(%constant_10_1), dimensions={}
+  %compare.12.3 = pred[10]{0} compare(%param_2.11, %broadcast.11.1), direction=LT, metadata={op_name="jit(f)/jit(main)/lt" source_file="<stdin>" source_line=15}
+  %constant_8_1 = s64[] constant(56)
+  %broadcast.9.1 = s64[10]{0} broadcast(%constant_8_1), dimensions={}
+  %add.13.3 = s64[10]{0} add(%param_2.11, %broadcast.9.1), metadata={op_name="jit(f)/jit(main)/add" source_file="<stdin>" source_line=15}
+  %select.14.3 = s64[10]{0} select(%compare.12.3, %add.13.3, %param_2.11), metadata={op_name="jit(f)/jit(main)/select_n" source_file="<stdin>" source_line=15}
+  %convert.15.1 = s32[10]{0} convert(%select.14.3), metadata={op_name="jit(f)/jit(main)/convert_element_type" source_file="<stdin>" source_line=15}
+  %bitcast.8 = s32[10,1]{1,0} bitcast(%convert.15.1), metadata={op_name="jit(f)/jit(main)/convert_element_type" source_file="<stdin>" source_line=15}
+  %param_1.1 = f64[10,1000]{1,0} parameter(1)
+  %bitcast.5.1 = f64[10,1,1000]{2,1,0} bitcast(%param_1.1)
+  ROOT %scatter.20.1 = f64[56,1000]{1,0} scatter(%param_0, %bitcast.8, %bitcast.5.1), update_window_dims={1,2}, inserted_window_dims={}, scatter_dims_to_operand_dims={0}, index_vector_dim=1, to_apply=%region_0.19, metadata={op_name="jit(f)/jit(main)/scatter" source_file="<stdin>" source_line=15}
+}
+
+%fused_add (param_0.8: f64[56,1000]) -> f64[56,1000] {
+  %param_0.8 = f64[56,1000]{1,0} parameter(0)
+  %constant_6_1 = f64[] constant(2)
+  %broadcast.7.3 = f64[56,1000]{1,0} broadcast(%constant_6_1), dimensions={}
+  %multiply.21.3 = f64[56,1000]{1,0} multiply(%param_0.8, %broadcast.7.3), metadata={op_name="jit(f)/jit(main)/mul" source_file="<stdin>" source_line=16}
+  %constant_4_1 = f64[] constant(1)
+  %broadcast.5.1 = f64[56,1000]{1,0} broadcast(%constant_4_1), dimensions={}
+  ROOT %add.22.1 = f64[56,1000]{1,0} add(%multiply.21.3, %broadcast.5.1), metadata={op_name="jit(f)/jit(main)/add" source_file="<stdin>" source_line=16}
+}
+
+ENTRY %main.23 (Arg_0.1: f64[56,1000], Arg_1.2: s64[10], Arg_2.3: f64[10,1000]) -> f64[56,1000] {
+  %Arg_2.3 = f64[10,1000]{1,0} parameter(2), metadata={op_name="vals"}
+  %Arg_1.2 = s64[10]{0} parameter(1), metadata={op_name="idx"}
+  %Arg_0.1 = f64[56,1000]{1,0} parameter(0), metadata={op_name="q"}
+  %copy.2 = f64[56,1000]{1,0} copy(%Arg_0.1)
+  %input_scatter_fusion = f64[56,1000]{1,0} fusion(%copy.2, %Arg_2.3, %Arg_1.2), kind=kInput, calls=%fused_scatter, metadata={op_name="jit(f)/jit(main)/scatter" source_file="<stdin>" source_line=15}
+  ROOT %loop_add_fusion = f64[56,1000]{1,0} fusion(%input_scatter_fusion), kind=kLoop, calls=%fused_add, metadata={op_name="jit(f)/jit(main)/add" source_file="<stdin>" source_line=16}
+}
+

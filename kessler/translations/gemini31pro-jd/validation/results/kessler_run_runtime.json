@@ -1,0 +1,15 @@
+{
+  "proc": "kessler_run",
+  "imported": true,
+  "wrapper_called": true,
+  "core_jit_called": true,
+  "wrapper_ok": true,
+  "core_ok": true,
+  "wrapper_exception": null,
+  "core_exception": null,
+  "wrapper_finite": true,
+  "core_finite": true,
+  "notes": [
+    "Wrapper validation uses bridge (kessler_run_bridge) with Fortran-layout inputs."
+  ]
+}

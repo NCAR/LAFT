@@ -1,0 +1,46 @@
+{
+  "modules": [
+    {
+      "name": "kessler",
+      "file": "data/src/kessler.F90",
+      "uses": [],
+      "level": 0,
+      "procedures": [
+        "kessler_init",
+        "kessler_run"
+      ],
+      "module_variables": [
+        {
+          "name": "lv",
+          "type": "real"
+        },
+        {
+          "name": "pref",
+          "type": "real"
+        },
+        {
+          "name": "rhoqr",
+          "type": "real"
+        }
+      ]
+    }
+  ],
+  "dependency_graph": {
+    "kessler": []
+  },
+  "translation_order": [
+    "kessler"
+  ],
+  "dependency_levels": {
+    "level_0": [
+      "kessler"
+    ]
+  },
+  "circular_dependencies": [],
+  "external_dependencies": [
+    "ccpp_kinds"
+  ],
+  "can_parallelize": {
+    "level_0": false
+  }
+}

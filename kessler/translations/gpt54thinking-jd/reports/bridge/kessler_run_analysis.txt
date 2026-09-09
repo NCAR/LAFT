@@ -1,0 +1,16 @@
+======================================================================
+BRIDGE ANALYSIS: kessler_run
+======================================================================
+
+STRATEGY: PATH C device-side layout conversion (pure H2D/D2H, in-jit axis reversal); JIT via emitted device wrapper + _core decorator
+
+LOOP SWAP SAFETY ANALYSIS
+----------------------------------------------------------------------
+Safety: UNSAFE
+
+Reasons:
+  • Contains I/O operations (WRITE/READ/PRINT)
+
+GPU EFFICIENCY WARNING
+----------------------------------------------------------------------
+Arrays are very small (~78.1 KB). Derecho A100 GPU overhead (~77μs: 15μs launch + 30μs setup + 32μs transfer) likely exceeds compute time. Recommendation: Use CPU execution for this workload.

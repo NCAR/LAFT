@@ -1,0 +1,25 @@
+{
+  "proc": "kessler_run",
+  "fortran": "kessler/out/procedures/kessler_run.F90",
+  "timestamp": "2026-09-04T10:39:58.890436",
+  "findings": [
+    {
+      "check": "zero-forever",
+      "severity": "WAIVED",
+      "name": "precl",
+      "detail": "translation only ever assigns a zero constant, but the Fortran computes this variable"
+    },
+    {
+      "check": "zero-forever",
+      "severity": "WARN",
+      "name": "relhum",
+      "detail": "translation only ever assigns a zero constant, but the Fortran computes this variable"
+    },
+    {
+      "check": "direction-masks",
+      "severity": "INFO",
+      "name": "do klev=lyr_surf,lyr_toa,lyr_step",
+      "detail": "no `(x - y) * dir >= 0` mask found for this loop \u2014 cannot judge statically; rely on the symmetry test (1b)"
+    }
+  ]
+}

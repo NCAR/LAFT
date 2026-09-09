@@ -1,0 +1,164 @@
+# LAFT per-project configuration — Kessler microphysics instance.
+#
+# One file per project. Paths are relative to the project root (the directory
+# containing this config/ directory) and the pipeline tools must be run from
+# that root, e.g.:  python tools/phase01_01_ts_parse.py
+#
+# Loaded by tools/framework_config.py.
+
+[project]
+name = "Kessler"
+
+[source]
+# Fortran source file(s) parsed by phase01 (currently exactly one supported).
+# The JD experiment: 128x56 grid, all-column kessler (data/exp2_jd/).
+fortran_files = ["data/exp2_jd/src/kessler.F90"]
+# Root of all generated pipeline artifacts
+out_root = "out"
+
+[reference]
+# Reference Fortran driver + ground-truth outputs. Kessler's reference
+# outputs are per-variable text files in data/exp2_jd/fortran_io/outputs/ (theta,
+# qv, qc, qr, precl, relhum); the [comparison].script below knows that format.
+# output_file names the representative file used for freshness checks only.
+dir           = "data/exp2_jd/src"               # reference Fortran driver tree
+driver_source = "JD_kessler_driver.F90"          # driver the JAX driver mirrors
+output_file   = "../fortran_io/outputs/theta.txt"
+
+[driver]
+script       = "out/driver/kessler_jax_driver.py"
+# The Kessler driver writes per-variable files (theta/qv/qc/qr/precl/relhum
+# .txt) to out/driver/; output_file names the representative one for the PBS
+# job's freshness check.
+output_file  = "out/driver/theta.txt"
+summary_json = "out/driver/kessler_driver.json"
+# Bridge-contract decision record (lifecycle: LAFT/config/project.template.toml).
+# Pinned WITHOUT a benchmark verdict.json, by design (project decision, 2026-08-20):
+# kessler has ONE array proc, so there is nothing to chain and c2 is
+# arithmetically identical to c1; c1 already wins at ~78x because the
+# kernel's work-per-byte amortizes the transfer. The LAFT_DRIVER_MODE switch
+# exists and both modes were certified bit-identical anyway (PBS
+# 7185154/7185230). Restore [1, 2] to re-open.
+contracts = [1]  # pinned 2026-08-21 (host arrays in/out); procedure: LAFT/docs/NEW_PROJECT_CHECKLIST.md §6
+
+[comparison]
+# Project comparison script (the fourth hand-made input, twin of [driver].script):
+# run by pbsJobs/jax_gpu_compvalues.sh. Contract: exit 0 = PASS, non-zero =
+# FAIL; writes a report + a JSON with top-level PASS/FAIL status next to the
+# JAX driver output. Kessler compares per-variable text files with
+# max-abs-error tolerances (set inside the script).
+script = "out/driver/kessler_compare_fortran_jax.py"
+
+[prompts]
+# Directory holding the translation policy files
+policies_dir = "workflow_translator/prompt_policies"
+# Project-specific policy files appended to Pass-1 prompts (empty list = none;
+# add a Kessler_jax_rules.md here as translation failures teach us what the
+# LLM gets wrong)
+project_policies = []
+# Argument names that trigger inclusion of error_policy.md
+error_arg_names = ["errmsg", "errflg"]
+
+[semantic_audit]                  # phase05_01b project gates (empty = generic only)
+# Kessler has no lookup tables and no kbot/ktop/kdir level conventions
+enabled_checks = []
+
+[heuristics]
+# Names never treated as data outputs (dimension/size arguments).
+dim_names = [
+  "n", "m", "k", "nn", "mm", "kk",
+  "nx", "ny", "nz", "ndim", "dim", "dims",
+  "rows", "cols", "nrows", "ncols",
+  "lda", "ldb", "ldc", "ld", "stride", "strides",
+  "size", "sizes", "len", "length",
+]
+# Scalar status-flag names (plus the generic "is*" prefix rule in code).
+scalar_flag_names = [
+  "isok", "is_ok", "ok",
+  "info", "ierr", "errno", "status",
+  "success", "flag", "failed", "error",
+  "converged",
+]
+# Loop-index name hints used by the phase03 loop-swap analyzer
+column_indicators = ["COL", "ICOL", "I", "N"]
+level_indicators  = ["K", "LEV", "KLEV", "KK", "ILEV"]
+
+[hpc]
+# Account, queue, conda env, and modules are set directly in the #PBS headers
+# of the pbsJobs/*.sh scripts — edit them there.
+driver_job      = "pbsJobs/jax_driver_gpu.sh"   # driver validation runs on GPU
+driver_job_cpu  = "pbsJobs/jax_driver.sh"       # optional CPU cross-check only
+driver_job_name = "jaxdrvgpu"          # #PBS -N in driver_job (log = <name>.o<id>)
+
+[hardware]                        # phase03 performance advisor
+gpu_name               = "Derecho A100"
+pcie_bandwidth_gbs     = 50
+gpu_mem_bandwidth_gbs  = 1200
+gpu_compute_tflops     = 9.7
+gpu_launch_overhead_us = 15
+gpu_transfer_setup_us  = 30
+
+[llm]
+copy_targets = ["claude-sonnet46-jd", "gemini31pro-jd", "gpt54thinking-jd", "qwen25-32b-jd"]
+# = one folder per LLM run in translations/: the 2026-04 JD-data translations
+#   re-validated under the current bridge (2026-09-04).
+
+[translator]                      # TRANSLATE_WORKFLOW.md Step 2 — who authors
+                                  # the INITIAL translation (repair is always
+                                  # the driving agent's, regardless of source)
+# --- qwen: the paper-1 Qwen translation (Qwen2.5-Coder-32B-Instruct via
+#     vLLM, April 2026 settings — pbsJobs/pbs_qwen25_translate.sh). Uncomment
+#     this block to re-run that translation; the ACTIVE block below is the
+#     re-validation of the archived files ---
+# source            = "qwen"
+# module            = "workflow_translator/qwen/qwen.md"
+# llm_label         = "Qwen2.5-32B (Qwen2.5-Coder-32B-Instruct via vLLM)"
+# pbs_translate_job      = "pbsJobs/pbs_qwen25_translate.sh"
+# pbs_translate_job_name = "qwen25_translate"   # #PBS -N (log = <name>.o<id>)
+# --- ACTIVE (2026-09-04 re-validation campaign): REUSE of the 2026-04 JD-data
+#     translations under the current bridge — NO re-translation. Each model's
+#     jax/ files were copied verbatim into out/jax/ (+ version header) and
+#     re-validated through Stage 2 with the loop/vectorization STRUCTURE
+#     FROZEN (the paper compares the per-model design): interface-only
+#     repairs. in_context path: the driving agent authors nothing, validates
+#     + repairs only. llm_label was set per run; the last run is shown.
+#     Archives: translations/{claude-sonnet46-jd,gemini31pro-jd,
+#     gpt54thinking-jd,qwen25-32b-jd}/ ---
+source            = "in_context"
+llm_label         = "Qwen2.5-32B (Qwen2.5-Coder-32B-Instruct via vLLM; 2026-04 JD-data run, reused)"
+
+[profiler]                        # workflow_profiler/ — see PROFILE_WORKFLOW.md
+target_proc   = "kessler_run"                   # kessler_init is scalar-only,
+                                                 # nothing to profile there
+staged_code   = "out/profiled/kessler_run.py"   # working copy the loop iterates on
+out_dir       = "out/profiled"
+# capture_state/tile_state are hand-authored here, not in the shared
+# framework — Kessler's driver is single-shot (128 real columns in one call,
+# no time-stepping loop). See inputs_script and PROFILE_WORKFLOW.md.
+inputs_script = "out/profiled/kessler_profiler_inputs.py"
+driver_module = "out/driver/kessler_jax_driver.py"
+bridge_module = "out.bridge.kessler_run_bridge"
+bridge_func   = "kessler_run_bridge"
+state_cache   = "out/profiled/kessler_run_state.pkl"
+# The driver's JSON result attribute is DRIVER_JSON, not the OUT_JSON default
+# — must be listed explicitly so a capture run redirects it to a scratch dir
+# instead of overwriting the validated out/driver/kessler_driver.json.
+driver_output_attrs = ["OUT_DIR", "DRIVER_JSON"]
+# Column tiling: the captured state is the bridge's own INPUT (Fortran/
+# col-major convention, shape (ncol, nz) — axis 0 is columns; the bridge's
+# to_row_major_2d transposes to (nz, ncol) only AFTER capture, for
+# kessler_run_core's vmap(in_axes=(...,1,...))). The driver's real 128
+# columns are cycled up to ncol. Multiplicative noise on the prognostic
+# fields keeps the cycled repeats from being bit-identical. The scalar in
+# ncol_args is set to the target ncol.
+column_axis     = 0
+ncol            = 1000                          # diagnose.py's thresholds were
+                                                 # calibrated at this ncol for Kessler
+ncol_check      = 100                           # second point for scaling gates
+n_calls         = 10
+noise_amplitude = 0.10
+noise_fields    = ["theta", "qv", "qc", "qr"]
+ncol_args       = ["ncol"]
+nvtx_label      = "kessler_profiled_calls"
+profile_trace_job = "pbsJobs/jax_gpu_profile_trace.sh"
+profile_nsys_job  = "pbsJobs/jax_gpu_profile_nsys.sh"

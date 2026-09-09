@@ -1,0 +1,13 @@
+======================================================================
+BRIDGE ANALYSIS: kessler_init
+======================================================================
+
+STRATEGY: PATH C device-side layout conversion (pure H2D/D2H, in-jit axis reversal); JIT via emitted device wrapper + _core decorator
+
+LOOP SWAP SAFETY ANALYSIS
+----------------------------------------------------------------------
+Safety: UNKNOWN
+
+Reasons:
+  • Insufficient analysis to prove safety
+  • No DO loops detected

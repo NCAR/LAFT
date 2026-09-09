@@ -1,0 +1,139 @@
+{
+  "status": "PASS",
+  "date": "2026-09-04 10:41:00",
+  "pytest_exit_code": 0,
+  "require_dependent": true,
+  "gate_rule": "all bridge_test/test_*_layout.py tests pass, zero skips among them, no failures/errors anywhere; AND every translation-dependent test runs and passes (--require-dependent)",
+  "bridges": [
+    "kessler_init_bridge.py",
+    "kessler_run_bridge.py"
+  ],
+  "layout_tests": {
+    "total": 9,
+    "passed": 9,
+    "skipped": 0
+  },
+  "translation_dependent_tests": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "state": "passed"
+  },
+  "analysis_reports": [
+    {
+      "file": "kessler_init_analysis.txt",
+      "safety": "Safety: UNKNOWN",
+      "gpu_warning": false
+    },
+    {
+      "file": "kessler_run_analysis.txt",
+      "safety": "Safety: UNSAFE",
+      "gpu_warning": true
+    }
+  ],
+  "tests": [
+    {
+      "file": "bridge_test.test_kessler_device_entry.TestDeviceEntryContract",
+      "test": "TestDeviceEntryContract::test_public_entry_and_alias",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_device_entry.TestDeviceEntryContract",
+      "test": "TestDeviceEntryContract::test_device_entry_bit_identical_to_host_bridge",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_runs_successfully",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_bridge_vs_direct_jax",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_driver_layout_preserved",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_physics_sanity",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_error_handling_negative_dt",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_module_vars_inout_pattern",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge_layout.TestTransferHelpers",
+      "test": "TestTransferHelpers::test_to_device_no_host_permute",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge_layout.TestTransferHelpers",
+      "test": "TestTransferHelpers::test_roundtrip_identity",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge_layout.TestTransferHelpers",
+      "test": "TestTransferHelpers::test_to_host_c_order",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge_layout.TestBridgeWiring",
+      "test": "TestBridgeWiring::test_passthrough_roundtrip_identity",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge_layout.TestBridgeWiring",
+      "test": "TestBridgeWiring::test_outputs_c_order_layout",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge_layout.TestBridgeWiring",
+      "test": "TestBridgeWiring::test_core_receives_reversed_layout",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge_layout.TestBridgeWiring",
+      "test": "TestBridgeWiring::test_static_scalars_concrete_at_trace",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge_layout.TestBridgeWiring",
+      "test": "TestBridgeWiring::test_strings_stay_host_side",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge_layout.TestBridgeWiring",
+      "test": "TestBridgeWiring::test_module_vars_threaded",
+      "outcome": "passed",
+      "message": ""
+    }
+  ]
+}

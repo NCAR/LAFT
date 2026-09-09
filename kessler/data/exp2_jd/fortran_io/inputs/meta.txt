@@ -1,0 +1,6 @@
+ncol=128
+nz=56
+dt=60.0
+lyr_surf=1
+lyr_toa=56
+seed=0

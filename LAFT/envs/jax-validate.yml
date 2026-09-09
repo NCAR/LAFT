@@ -1,0 +1,24 @@
+# LAFT validation / driver / profiler environment (Stages 1-3).
+# Used by every jax_* PBS job in LAFT/pbsJobs and by the bridge test suite.
+#
+#   conda env create -f LAFT/envs/jax-validate.yml
+#   conda activate jax-validate
+#
+# jax==0.6.2 is the version that matters: it fixes the numerics the
+# translations were validated against (the Fortran comparisons in
+# kessler/translations/*/driver/results were produced with it) and it is part
+# of the XLA persistent-cache key. The CUDA 12 wheels target NVIDIA A100 GPUs;
+# for a CPU-only machine replace "jax[cuda12]==0.6.2" with "jax==0.6.2".
+name: jax-validate
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - jax[cuda12]==0.6.2
+      - numpy==2.2.6
+      - scipy==1.15.3
+      - matplotlib==3.10.8   # optional: the driver skips plots if absent
+      - pytest==9.0.2        # bridge test suite (kessler/bridge_test)
+      - tomli==2.4.0         # config loader fallback on Python 3.10

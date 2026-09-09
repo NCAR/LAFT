@@ -1,0 +1,108 @@
+{
+  "workflow": "workflow_translator/TRANSLATE_WORKFLOW.md",
+  "status": "complete",
+  "llm": "Qwen2.5-32B (Qwen2.5-Coder-32B-Instruct via vLLM)",
+  "updated_at": "2026-09-04T10:53:26",
+  "completed_steps": [
+    "generated out/jax/kessler_init.py",
+    "generated out/jax/kessler_run.py",
+    "froze four-pass statistics",
+    "semantic audit passed (0 FAIL, 0 WARN, 0 waived)",
+    "lint passed",
+    "fix-attempt-1 applied (kessler_run one-level CFL guard); lint+audit re-run green",
+    "runtime validation (PBS 7313978) + bridge suite 17/17 (PBS 7313979) passed after fix-attempt-1",
+    "driver passed (host mode, PBS 7313985)",
+    "comparison ALL PASS (host mode, PBS 7313992)",
+    "snapshotted out/jax/*.validated.py"
+  ],
+  "pbs_runtime_validation": {
+    "job_id": "7313978",
+    "job_name": "runtimevalidate",
+    "expected_log": "runtimevalidate.o7313978",
+    "submit_command": "qsub pbsJobs/jax_gpu_runtimevalid.sh",
+    "status_command": "qstat 7313978"
+  },
+  "required_result_files": [
+    "out/lint/_summary.json",
+    "out/validation/<proc>_runtime.json (one per procedure)",
+    "out/driver/kessler_driver.json",
+    "out/driver/compare_results_fortran_jax.txt",
+    "out/driver/comparison.json"
+  ],
+  "next_steps": [
+    "check qstat 7313992",
+    "read comparevalues.o7313992",
+    "read out/driver/compare_results_fortran_jax.txt",
+    "read out/driver/comparison.json (convenience; check invariants + status)",
+    "write out/jax/translation_report.md"
+  ],
+  "step_timestamps": [
+    {
+      "step": "generated out/jax/kessler_init.py",
+      "at": "2026-09-04T10:48:32"
+    },
+    {
+      "step": "generated out/jax/kessler_run.py",
+      "at": "2026-09-04T10:48:32"
+    },
+    {
+      "step": "froze four-pass statistics",
+      "at": "2026-09-04T10:48:32"
+    },
+    {
+      "step": "semantic audit passed (0 FAIL, 0 WARN, 0 waived)",
+      "at": "2026-09-04T10:48:59"
+    },
+    {
+      "step": "lint passed",
+      "at": "2026-09-04T10:48:59"
+    },
+    {
+      "step": "fix-attempt-1 applied (kessler_run one-level CFL guard); lint+audit re-run green",
+      "at": "2026-09-04T10:50:49"
+    },
+    {
+      "step": "runtime validation (PBS 7313978) + bridge suite 17/17 (PBS 7313979) passed after fix-attempt-1",
+      "at": "2026-09-04T10:51:27"
+    },
+    {
+      "step": "driver passed (host mode, PBS 7313985)",
+      "at": "2026-09-04T10:52:02"
+    },
+    {
+      "step": "comparison ALL PASS (host mode, PBS 7313992)",
+      "at": "2026-09-04T10:53:26"
+    },
+    {
+      "step": "snapshotted out/jax/*.validated.py",
+      "at": "2026-09-04T10:53:26"
+    }
+  ],
+  "fix_attempts": [
+    {
+      "n": 1,
+      "timestamp": "2026-09-04T10:50:26",
+      "proc": "kessler_run",
+      "failed_stage": "runtime",
+      "error_summary": "PBS 7313968: ValueError zero-size array to reduction operation min \u2014 harness DUMMY_N=4 gives lyr_surf=lyr_toa=4 (one-level range), the CFL jnp.min reduces over an empty interior range (wrapper_ok=False, core_ok=False)",
+      "file_edited": "out/jax/kessler_run.py",
+      "change_summary": "static Python guard `if lyr_surf_idx != lyr_toa_idx:` around the two CFL min-reductions (initial dt0 and in the sub-cycle body); empty range leaves dt0 unchanged exactly as the Fortran's empty loop does; serial column fori_loop / vectorised level scatters untouched"
+    }
+  ],
+  "fix_attempts_used": 1,
+  "fix_attempts_max": 5,
+  "pbs_driver": {
+    "job_id": "7313985",
+    "job_name": "jaxdrvgpu",
+    "expected_log": "jaxdrvgpu.o7313985",
+    "submit_command": "qsub pbsJobs/jax_driver_gpu.sh",
+    "status_command": "qstat 7313985"
+  },
+  "pbs_comparison": {
+    "job_id": "7313992",
+    "job_name": "comparevalues",
+    "expected_log": "comparevalues.o7313992",
+    "submit_command": "qsub pbsJobs/jax_gpu_compvalues.sh",
+    "status_command": "qstat 7313992"
+  }
+}

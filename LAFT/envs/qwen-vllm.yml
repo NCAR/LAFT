@@ -1,0 +1,22 @@
+# LAFT local-LLM environment: vLLM offline inference for the Qwen translation
+# job (pbsJobs/pbs_qwen25_translate.sh). Only needed to re-run that job; the
+# in-context agents (Claude Code, Codex, Gemini CLI) need no environment here.
+#
+#   conda env create -f LAFT/envs/qwen-vllm.yml     # on a GPU node, see below
+#   conda activate qwen-vllm
+#
+# vllm==0.15.1 / python 3.11 is the environment the paper-1 Qwen translation
+# (Qwen2.5-Coder-32B-Instruct, April 2026) ran in. pip pulls several GB of
+# CUDA wheels, so create the env on a compute node that matches the GPUs it
+# will run on (NCAR: submit the `conda env create` through a batch job).
+# Model weights are not part of the environment:
+#   huggingface-cli download Qwen/Qwen2.5-Coder-32B-Instruct --local-dir <MODEL>
+name: qwen-vllm
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - vllm==0.15.1
+      - huggingface_hub[cli]

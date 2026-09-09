@@ -1,0 +1,113 @@
+{
+  "workflow": "workflow_translator/TRANSLATE_WORKFLOW.md",
+  "status": "complete",
+  "llm": "Claude Sonnet 4.6 (claude-sonnet-4-6)",
+  "updated_at": "2026-09-04T10:17:25",
+  "completed_steps": [
+    "generated out/jax/kessler_init.py",
+    "generated out/jax/kessler_run.py",
+    "froze four-pass statistics",
+    "semantic audit passed (0 FAIL, 4 WARN, 0 waived)",
+    "lint passed",
+    "runtime validation passed (PBS 7313640, 2/2 procs ok+finite)",
+    "fix-attempt-1 applied (kessler_run errflg precedence); lint+audit re-run green",
+    "runtime validation (PBS 7313717) + bridge suite 17/17 (PBS 7313718) passed after fix-attempt-1",
+    "driver passed (host mode, PBS 7313723)",
+    "comparison ALL PASS (host mode, PBS 7313728)",
+    "snapshotted out/jax/*.validated.py"
+  ],
+  "pbs_runtime_validation": {
+    "job_id": "7313717",
+    "job_name": "runtimevalidate",
+    "expected_log": "runtimevalidate.o7313717",
+    "submit_command": "qsub pbsJobs/jax_gpu_runtimevalid.sh",
+    "status_command": "qstat 7313717"
+  },
+  "required_result_files": [
+    "out/lint/_summary.json",
+    "out/validation/<proc>_runtime.json (one per procedure)",
+    "out/driver/kessler_driver.json",
+    "out/driver/compare_results_fortran_jax.txt",
+    "out/driver/comparison.json"
+  ],
+  "next_steps": [
+    "check qstat 7313728",
+    "read comparevalues.o7313728",
+    "read out/driver/compare_results_fortran_jax.txt",
+    "read out/driver/comparison.json (convenience; check invariants + status)",
+    "write out/jax/translation_report.md"
+  ],
+  "step_timestamps": [
+    {
+      "step": "generated out/jax/kessler_init.py",
+      "at": "2026-09-03T10:07:05"
+    },
+    {
+      "step": "generated out/jax/kessler_run.py",
+      "at": "2026-09-03T10:07:05"
+    },
+    {
+      "step": "froze four-pass statistics",
+      "at": "2026-09-03T10:07:14"
+    },
+    {
+      "step": "semantic audit passed (0 FAIL, 4 WARN, 0 waived)",
+      "at": "2026-09-03T10:07:34"
+    },
+    {
+      "step": "lint passed",
+      "at": "2026-09-04T10:07:29"
+    },
+    {
+      "step": "runtime validation passed (PBS 7313640, 2/2 procs ok+finite)",
+      "at": "2026-09-04T10:08:58"
+    },
+    {
+      "step": "fix-attempt-1 applied (kessler_run errflg precedence); lint+audit re-run green",
+      "at": "2026-09-04T10:14:12"
+    },
+    {
+      "step": "runtime validation (PBS 7313717) + bridge suite 17/17 (PBS 7313718) passed after fix-attempt-1",
+      "at": "2026-09-04T10:15:18"
+    },
+    {
+      "step": "driver passed (host mode, PBS 7313723)",
+      "at": "2026-09-04T10:16:08"
+    },
+    {
+      "step": "comparison ALL PASS (host mode, PBS 7313728)",
+      "at": "2026-09-04T10:17:25"
+    },
+    {
+      "step": "snapshotted out/jax/*.validated.py",
+      "at": "2026-09-04T10:17:25"
+    }
+  ],
+  "fix_attempts": [
+    {
+      "n": 1,
+      "timestamp": "2026-09-04T10:13:31",
+      "proc": "kessler_run",
+      "failed_stage": "bridge_suite",
+      "error_summary": "test_error_handling_negative_dt: errflg=2 instead of 1 for dt=-60 (column dt0<1e-12 check overrode the top-level dt<=0 flag; PBS 7313663)",
+      "file_edited": "out/jax/kessler_run.py",
+      "change_summary": "col_errflg precedence: keep errflg (1, dt<=0) when already set; bad-time-split (2) only when errflg==0 \u2014 mirrors Fortran early return"
+    }
+  ],
+  "fix_attempts_used": 1,
+  "fix_attempts_max": 5,
+  "pbs_driver": {
+    "job_id": "7313723",
+    "job_name": "jaxdrvgpu",
+    "expected_log": "jaxdrvgpu.o7313723",
+    "submit_command": "qsub pbsJobs/jax_driver_gpu.sh",
+    "status_command": "qstat 7313723"
+  },
+  "pbs_comparison": {
+    "job_id": "7313728",
+    "job_name": "comparevalues",
+    "expected_log": "comparevalues.o7313728",
+    "submit_command": "qsub pbsJobs/jax_gpu_compvalues.sh",
+    "status_command": "qstat 7313728"
+  }
+}

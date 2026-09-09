@@ -1,0 +1,49 @@
+{
+  "proc": "kessler_run",
+  "fortran": "kessler/out/procedures/kessler_run.F90",
+  "timestamp": "2026-09-04T10:13:59.855682",
+  "findings": [
+    {
+      "check": "zero-forever",
+      "severity": "WARN",
+      "name": "pc",
+      "detail": "translation only ever assigns a zero constant, but the Fortran computes this variable"
+    },
+    {
+      "check": "zero-forever",
+      "severity": "WARN",
+      "name": "r",
+      "detail": "translation only ever assigns a zero constant, but the Fortran computes this variable"
+    },
+    {
+      "check": "zero-forever",
+      "severity": "WARN",
+      "name": "rhalf",
+      "detail": "translation only ever assigns a zero constant, but the Fortran computes this variable"
+    },
+    {
+      "check": "zero-forever",
+      "severity": "WARN",
+      "name": "velqr",
+      "detail": "translation only ever assigns a zero constant, but the Fortran computes this variable"
+    },
+    {
+      "check": "intent-out",
+      "severity": "WAIVED",
+      "name": "precl",
+      "detail": "Fortran intent(out) arg is only ever copied from its incoming value (or never assigned) \u2014 risk of accumulation across calls"
+    },
+    {
+      "check": "intent-out",
+      "severity": "WAIVED",
+      "name": "relhum",
+      "detail": "Fortran intent(out) arg is only ever copied from its incoming value (or never assigned) \u2014 risk of accumulation across calls"
+    },
+    {
+      "check": "direction-masks",
+      "severity": "INFO",
+      "name": "do klev=lyr_surf,lyr_toa,lyr_step",
+      "detail": "no `(x - y) * dir >= 0` mask found for this loop \u2014 cannot judge statically; rely on the symmetry test (1b)"
+    }
+  ]
+}

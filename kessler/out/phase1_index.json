@@ -1,0 +1,300 @@
+{
+  "source_file": "data/src/kessler.F90",
+  "syntax_ok": true,
+  "openmp_directives": [],
+  "warnings": [],
+  "procedures_written": 2,
+  "programs_written": 0,
+  "modules_written": 1,
+  "procedures": [
+    {
+      "kind": "subroutine",
+      "name": "kessler_init",
+      "args": [
+        "lv_in",
+        "pref_in",
+        "rhoqr_in",
+        "errmsg",
+        "errflg"
+      ],
+      "arg_metadata": {
+        "lv_in": {
+          "name": "lv_in",
+          "dtype": "real",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "in"
+        },
+        "pref_in": {
+          "name": "pref_in",
+          "dtype": "real",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "in"
+        },
+        "rhoqr_in": {
+          "name": "rhoqr_in",
+          "dtype": "real",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "in"
+        },
+        "errmsg": {
+          "name": "errmsg",
+          "dtype": "character",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "out"
+        },
+        "errflg": {
+          "name": "errflg",
+          "dtype": "integer",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "out"
+        }
+      },
+      "source_file": "data/src/kessler.F90",
+      "unit_file": "out/procedures/kessler_init.F90",
+      "start_byte": 523,
+      "end_byte": 1153
+    },
+    {
+      "kind": "subroutine",
+      "name": "kessler_run",
+      "args": [
+        "ncol",
+        "nz",
+        "dt",
+        "lyr_surf",
+        "lyr_toa",
+        "cpair",
+        "rair",
+        "rho",
+        "z",
+        "pk",
+        "theta",
+        "qv",
+        "qc",
+        "qr",
+        "precl",
+        "relhum",
+        "scheme_name",
+        "errmsg",
+        "errflg"
+      ],
+      "arg_metadata": {
+        "ncol": {
+          "name": "ncol",
+          "dtype": "integer",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "in"
+        },
+        "nz": {
+          "name": "nz",
+          "dtype": "integer",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "in"
+        },
+        "dt": {
+          "name": "dt",
+          "dtype": "real",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "in"
+        },
+        "lyr_surf": {
+          "name": "lyr_surf",
+          "dtype": "integer",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "in"
+        },
+        "lyr_toa": {
+          "name": "lyr_toa",
+          "dtype": "integer",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "in"
+        },
+        "scheme_name": {
+          "name": "scheme_name",
+          "dtype": "character",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "out"
+        },
+        "errmsg": {
+          "name": "errmsg",
+          "dtype": "character",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "out"
+        },
+        "errflg": {
+          "name": "errflg",
+          "dtype": "integer",
+          "rank": 0,
+          "dimensions": [],
+          "intent": "out"
+        },
+        "cpair": {
+          "name": "cpair",
+          "dtype": "real",
+          "rank": 2,
+          "dimensions": [
+            ":",
+            ":"
+          ],
+          "intent": null
+        },
+        "rair": {
+          "name": "rair",
+          "dtype": "real",
+          "rank": 2,
+          "dimensions": [
+            ":",
+            ":"
+          ],
+          "intent": null
+        },
+        "rho": {
+          "name": "rho",
+          "dtype": "real",
+          "rank": 2,
+          "dimensions": [
+            ":",
+            ":"
+          ],
+          "intent": null
+        },
+        "z": {
+          "name": "z",
+          "dtype": "real",
+          "rank": 2,
+          "dimensions": [
+            ":",
+            ":"
+          ],
+          "intent": null
+        },
+        "pk": {
+          "name": "pk",
+          "dtype": "real",
+          "rank": 2,
+          "dimensions": [
+            ":",
+            ":"
+          ],
+          "intent": null
+        },
+        "theta": {
+          "name": "theta",
+          "dtype": "real",
+          "rank": 2,
+          "dimensions": [
+            ":",
+            ":"
+          ],
+          "intent": null
+        },
+        "qv": {
+          "name": "qv",
+          "dtype": "real",
+          "rank": 2,
+          "dimensions": [
+            ":",
+            ":"
+          ],
+          "intent": null
+        },
+        "qc": {
+          "name": "qc",
+          "dtype": "real",
+          "rank": 2,
+          "dimensions": [
+            ":",
+            ":"
+          ],
+          "intent": null
+        },
+        "qr": {
+          "name": "qr",
+          "dtype": "real",
+          "rank": 2,
+          "dimensions": [
+            ":",
+            ":"
+          ],
+          "intent": null
+        },
+        "precl": {
+          "name": "precl",
+          "dtype": "real",
+          "rank": 1,
+          "dimensions": [
+            ":"
+          ],
+          "intent": null
+        },
+        "relhum": {
+          "name": "relhum",
+          "dtype": "real",
+          "rank": 2,
+          "dimensions": [
+            ":",
+            ":"
+          ],
+          "intent": null
+        }
+      },
+      "source_file": "data/src/kessler.F90",
+      "unit_file": "out/procedures/kessler_run.F90",
+      "start_byte": 3663,
+      "end_byte": 14857
+    }
+  ],
+  "programs": [],
+  "modules": [
+    {
+      "kind": "module",
+      "name": "kessler",
+      "source_file": "data/src/kessler.F90",
+      "block_file": "out/modules/kessler.F90",
+      "start_byte": 0,
+      "end_byte": 14954
+    }
+  ],
+  "module_metadata": [
+    {
+      "module_name": "kessler",
+      "source_file": "data/src/kessler.F90",
+      "uses_modules": [
+        "ccpp_kinds"
+      ],
+      "module_variables": [
+        {
+          "name": "lv",
+          "type": "real"
+        },
+        {
+          "name": "pref",
+          "type": "real"
+        },
+        {
+          "name": "rhoqr",
+          "type": "real"
+        }
+      ],
+      "public_entities": [],
+      "private_entities": [],
+      "procedures": [
+        "kessler_init",
+        "kessler_run"
+      ]
+    }
+  ],
+  "enhanced": true
+}

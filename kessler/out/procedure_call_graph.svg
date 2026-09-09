@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="460" height="216">
+<rect width="100%" height="100%" fill="#1E1E2E"/>
+<g font-family="monospace" font-size="11">
+<g stroke="#555577" stroke-width="1" fill="none" opacity="0.6">
+</g>
+<rect x="40.0" y="30.0" width="180" height="28" rx="5" fill="#4C8BF5" opacity="0.85"/>
+<text x="130.0" y="48.0" text-anchor="middle" fill="white" font-weight="bold">kessler_init</text>
+<rect x="240.0" y="30.0" width="180" height="28" rx="5" fill="#4C8BF5" opacity="0.85"/>
+<text x="330.0" y="48.0" text-anchor="middle" fill="white" font-weight="bold">kessler_run</text>
+</g>
+</svg>

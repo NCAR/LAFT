@@ -1,0 +1,93 @@
+{
+  "proc": "kessler_run",
+  "timestamp": "2026-09-04T10:50:26.825351",
+  "metadata": {
+    "jax_file": "out/jax/kessler_run.py",
+    "has_io": false,
+    "wrapper_only": false,
+    "scalar_only": false,
+    "scalar_jax": false,
+    "jax_required": true,
+    "args_count": 19,
+    "writes_count": 9
+  },
+  "checks": [
+    {
+      "name": "has bridge metadata",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "no host compute loops (element stores)",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "no Python loop wrapping JAX calls",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "uses jax",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "uses jnp",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "no numpy",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "has wrapper",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "no swapaxes in module",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "has core",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "core has no string params",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "core has no I/O",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "wrapper has no I/O",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "wrapper args match expected",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "bridge call matches JAX signature",
+      "passed": true,
+      "details": null
+    }
+  ],
+  "summary": {
+    "total_checks": 14,
+    "passed": 14,
+    "failed": 0,
+    "score": 100.0,
+    "overall": "PASS"
+  }
+}

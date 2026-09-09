@@ -1,0 +1,39 @@
+{
+  "frozen_at": "2026-09-04T10:48:32",
+  "table": "four-pass authorship statistics (IMMUTABLE)",
+  "llm_label": "Qwen2.5-32B (Qwen2.5-Coder-32B-Instruct via vLLM; 2026-04 JD-data run, reused)",
+  "translator_source": "in_context",
+  "token_data_available": false,
+  "wall_clock_source": "elapsed between per-procedure state updates (includes pauses)",
+  "procedures": 2,
+  "rows": [
+    {
+      "module": "kessler",
+      "proc": "kessler_init",
+      "passes": 1,
+      "fortran_lines": 17,
+      "fortran_code_lines": 12,
+      "jax_lines": 39,
+      "jax_code_lines": 27,
+      "prompt_chars": 7807,
+      "jax_chars": 1454,
+      "prompt_tokens": null,
+      "output_tokens": null,
+      "wall_clock_s": null
+    },
+    {
+      "module": "kessler",
+      "proc": "kessler_run",
+      "passes": 4,
+      "fortran_lines": 210,
+      "fortran_code_lines": 129,
+      "jax_lines": 121,
+      "jax_code_lines": 76,
+      "prompt_chars": 85360,
+      "jax_chars": 8818,
+      "prompt_tokens": null,
+      "output_tokens": null,
+      "wall_clock_s": 0.0
+    }
+  ]
+}

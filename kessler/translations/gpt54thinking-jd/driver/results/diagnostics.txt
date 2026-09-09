@@ -1,0 +1,14 @@
+Kessler Microphysics Results
+==================================================
+
+Configuration:
+  Columns:   128
+  Levels:    56
+  Timestep:  60.0 s
+  Scheme:    
+
+Results:
+  Mean precipitation: 0.5060 mm/hr
+  Max  precipitation: 0.6399 mm/hr
+  Mean RH:            79.8 %
+  Temperature change: -2.2126 K

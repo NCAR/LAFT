@@ -1,0 +1,19 @@
+# LAFT frontend environment (Stage 0): tree-sitter parsing of the Fortran.
+# Used by workflow_frontend/phase01_01_ts_parse.py and phase02_02_deps_JSON.py.
+#
+#   conda env create -f LAFT/envs/ts.yml
+#   conda activate ts
+#
+# The tree_sitter / tree_sitter_languages pair is pinned on purpose:
+# tree_sitter_languages 1.10.2 ships the Fortran grammar and only works with
+# tree_sitter 0.20.x; a newer tree_sitter (0.21+) makes get_language("fortran")
+# raise TypeError.
+name: ts
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - tree-sitter==0.20.4
+      - tree-sitter-languages==1.10.2

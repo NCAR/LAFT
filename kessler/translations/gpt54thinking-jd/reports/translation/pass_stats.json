@@ -1,0 +1,39 @@
+{
+  "frozen_at": "2026-09-04T10:38:32",
+  "table": "four-pass authorship statistics (IMMUTABLE)",
+  "llm_label": "GPT-5.4 Thinking (2026-04 JD-data run, reused)",
+  "translator_source": "in_context",
+  "token_data_available": false,
+  "wall_clock_source": "elapsed between per-procedure state updates (includes pauses)",
+  "procedures": 2,
+  "rows": [
+    {
+      "module": "kessler",
+      "proc": "kessler_init",
+      "passes": 1,
+      "fortran_lines": 17,
+      "fortran_code_lines": 12,
+      "jax_lines": 28,
+      "jax_code_lines": 17,
+      "prompt_chars": 7807,
+      "jax_chars": 936,
+      "prompt_tokens": null,
+      "output_tokens": null,
+      "wall_clock_s": null
+    },
+    {
+      "module": "kessler",
+      "proc": "kessler_run",
+      "passes": 4,
+      "fortran_lines": 210,
+      "fortran_code_lines": 129,
+      "jax_lines": 347,
+      "jax_code_lines": 271,
+      "prompt_chars": 85360,
+      "jax_chars": 20221,
+      "prompt_tokens": null,
+      "output_tokens": null,
+      "wall_clock_s": 0.0
+    }
+  ]
+}
