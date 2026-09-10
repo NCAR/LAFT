@@ -32,8 +32,6 @@
 !!   mkdir -p _compare_results/outputs/scalability
 !!   ./data/exp2_jd/src/scalability_benchmark_fortran
 !!
-!! Or submit ../LAFT/pbsJobs/compare_scalability_fortran.sh, which does both.
-!!
 
 program scalability_benchmark_fortran
 

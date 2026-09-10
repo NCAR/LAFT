@@ -83,13 +83,12 @@ on another cluster.
 - **GPU scalability and profiling** (`kessler/_compare_results/outputs/plots/`,
   `reports/*_nsys_report_*.md`): produced on A100 GPUs; the reference data
   and the JAX code are in the repository, the timings depend on the hardware.
-  The Fortran-vs-JAX scalability figure is regenerated with the two
-  `compare_scalability_*.sh` jobs in `LAFT/pbsJobs/` (serial Fortran on one
-  CPU core, the four translations on one GPU) followed by
-  `kessler/_compare_results/plot_Fortran_vs_LLMs_scalability.py`; the
-  paper's timing JSONs are archived under `kessler/_compare_results/outputs/scalability/`.
-  The Nsight Systems reports come from `compare_profiling_LLMs.sh` in `nsys`
-  mode, which runs `kessler/_compare_results/LLMx_jd_profiling_run.py`.
+  The paper's timing data behind the scalability figure (serial Fortran on
+  one CPU core and the four translations on one GPU) is archived under
+  `kessler/_compare_results/outputs/scalability/`. The evaluation scripts
+  that produced the cross-model figures and profiling reports are not part
+  of LAFT and are not included; the serial Fortran benchmark source is in
+  `kessler/data/exp2_jd/src/`.
 - **The OpenACC GPU reference** (`kessler/data/exp2_jd/acc_src/`): the
   manually accelerated Fortran used in the paper's scalability comparison,
   with its driver, Makefile, and profiling runner, so its timings can be
