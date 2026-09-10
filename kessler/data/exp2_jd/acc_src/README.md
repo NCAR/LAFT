@@ -7,7 +7,8 @@ it, run it, and compare the timings with any JAX translation of their own.
 
 | File | What it is |
 |---|---|
-| `kessler.F90`, `kessler_update.F90` | The scheme with OpenACC directives (`!$acc parallel loop ...`). The driver-owned arrays are placed on the device by the driver and referenced with `default(present)`; the `DEVICEPTR` macro at the top of each file is intentionally empty for this build. |
+| `kessler.F90` | The scheme with OpenACC directives (`!$acc parallel loop ...`). The driver-owned arrays are placed on the device by the driver and referenced with `default(present)`; the `DEVICEPTR` macro at the top of the file is intentionally empty for this build. |
+| `kessler_update.F90` | The companion CCPP scheme the driver calls after the microphysics for diagnostic checksums. It only reads the Kessler fields and is not part of the timed call or of the translation work. |
 | `ccpp_kinds.F90`, `*.meta` | Kind definitions and CCPP metadata, identical to `../src/`. |
 | `driver_kessler.F90` | The GPU driver: allocates the arrays on the device (`omp_target_alloc` / `omp_target_associate_ptr`), fills them with physically structured random inputs (fixed seed), calls `kessler_run` once, and prints checksums. Takes `ncol nz` on the command line (default `1000 56`); `dt = 60 s`. |
 | `Makefile` | `make ARCH=GPU` builds the OpenACC binary with nvfortran; `make` builds a CPU nvfortran binary; `make COMPILER=gnu` a gfortran one. FMA is disabled (`-Mnofma`) so results match the reference logs. |
