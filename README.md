@@ -1,5 +1,7 @@
 # LAFT — LLM-Assisted Fortran Translation
 
+[![DOI](https://zenodo.org/badge/1355304974.svg)](https://doi.org/10.5281/zenodo.22696825)
+
 Code and data for the LAFT paper 1: translating the Kessler warm-rain
 microphysics scheme from Fortran to JAX with four large language models, and
 validating every translation against the Fortran reference with a
@@ -91,7 +93,8 @@ machine-readable metadata is in [`CITATION.cff`](CITATION.cff) (GitHub's
 > Gagne, D. J., Linck, I., Dennis, J., Schreck, J., & Stengel, K. (2026).
 > Evaluating LLMs for Translating Legacy Fortran Atmospheric Physics to
 > GPU-Accelerated JAX. Preprint submitted to arXiv; manuscript submitted to
-> the Journal of Advances in Modeling Earth Systems (JAMES).
+> the Journal of Advances in Modeling Earth Systems (JAMES). Code and data:
+> https://doi.org/10.5281/zenodo.22696825
 
 ```bibtex
 @article{gagne2026laft,
@@ -101,11 +104,13 @@ machine-readable metadata is in [`CITATION.cff`](CITATION.cff) (GitHub's
              Schreck, John and Stengel, Karen},
   year    = {2026},
   note    = {Preprint submitted to arXiv; manuscript submitted to JAMES},
-  url     = {https://github.com/NCAR/LAFT}
+  url     = {https://github.com/NCAR/LAFT},
+  doi     = {10.5281/zenodo.22696825}
 }
 ```
 
-The arXiv identifier and journal DOI will be added here and in
+The Zenodo DOI above is the concept DOI and always resolves to the latest
+release. The arXiv identifier and journal DOI will be added here and in
 `CITATION.cff` once assigned.
 
 ## License

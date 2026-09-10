@@ -34,6 +34,7 @@ authors:
     given-names: Karen
     affiliation: NSF National Center for Atmospheric Research
 repository-code: https://github.com/NCAR/LAFT
+doi: 10.5281/zenodo.22696825
 license: Apache-2.0
 keywords:
   - Fortran
