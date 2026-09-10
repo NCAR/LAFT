@@ -22,12 +22,14 @@ these settings.
 | `jax_gpu_profile_trace.sh` | Profiler: `jax.profiler.trace` + XLA HLO dump | 1 GPU |
 | `jax_gpu_profile_nsys.sh` | Profiler: NVIDIA Nsight Systems kernel/memcpy stats | 1 GPU + `nsys` |
 | `pbs_qwen25_translate.sh` | Phase 4: the **paper-1 Qwen translation** — Qwen2.5-Coder-32B-Instruct via vLLM with the April 2026 settings fixed | 2 GPUs |
+| `compare_scalability_fortran.sh` | Serial Fortran CPU baseline of the scalability figure: compiles and runs `kessler/data/exp2_jd/src/scalability_benchmark_fortran.F90` with gfortran -O2 | 1 CPU |
+| `compare_scalability_LLMs.sh` | JAX half of the scalability figure: `kessler/_compare_results/scalability_benchmark_LLMs.py` over the four translation archives | 1 GPU |
 | `acc_kessler_profile.sh` | OpenACC reference (`kessler/data/exp2_jd/acc_src/`): timing / memory / nsys profiling of the compiled Fortran binary, one mode per submission | 1 GPU + `nsys` |
 | `acc_kessler_ncol_sweep.sh` | OpenACC reference: per-ncol wall-clock and nsys kernel-time sweep, the OpenACC column of the paper's scalability figure | 1 GPU + `nsys` |
 
 The `jax_*` scripts assume the project layout described in
 `LAFT/docs/architecture.md` and are submitted from the project root, so that
-`PBS_O_WORKDIR` resolves the `out/` tree. The `acc_*` scripts are submitted from the `kessler/` project root and
+`PBS_O_WORKDIR` resolves the `out/` tree. The `compare_*` and `acc_*` scripts are submitted from the `kessler/` project root; the `compare_*` pair needs nothing built first, while the `acc_*` scripts
 expect the OpenACC binary to be built first (`make ARCH=GPU` in
 `data/exp2_jd/acc_src/`). `pbs_qwen25_translate.sh` is only
 needed to re-run the paper's locally hosted Qwen translation; the

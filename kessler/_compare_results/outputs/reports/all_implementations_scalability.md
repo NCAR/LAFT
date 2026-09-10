@@ -63,7 +63,7 @@ Speedup = OpenACC GPU exec / Gemini JAX. Values > 1 mean OpenACC kernel is faste
 
 | Data | Source |
 |------|--------|
-| Fortran CPU serial | `translations/_compare_results/outputs/scalability/fortran_scalability_results.json` |
-| JAX LLM timings | `translations/_compare_results/outputs/scalability/LLMs_scalability_results.json` |
+| Fortran CPU serial | `_compare_results/outputs/scalability/fortran_scalability_results.json` |
+| JAX LLM timings | `_compare_results/outputs/scalability/LLMs_scalability_results.json` |
 | OpenACC wall-clock | `acc_kessler_profiling.py --mode ncol_sweep` in `data/exp2_jd/acc_src/` (steady-state wall-clock table) |
 | OpenACC GPU exec | same sweep, nsys pass (`cuda_gpu_kern_sum`); the OpenACC source and runner are in `data/exp2_jd/acc_src/` |

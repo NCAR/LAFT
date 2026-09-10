@@ -16,18 +16,23 @@
 !!
 !! Outputs
 !! -------
-!!   translations/_compare_results/outputs/scalability/fortran_scalability_results.json
+!!   _compare_results/outputs/scalability/fortran_scalability_results.json
+!!   (path relative to the kessler project root; the binary must be run there)
 !!
-!! Compilation (from project root)
-!! --------------------------------
-!!   gfortran -O2 -o data/src_jd/scalability_benchmark_fortran \
-!!       data/src/ccpp_kinds.F90 \
-!!       data/src/kessler.F90 \
-!!       data/src_jd/scalability_benchmark_fortran.F90
+!! Compilation (from the kessler project root)
+!! -------------------------------------------
+!!   gfortran -O2 -ffree-line-length-none \
+!!       -o data/exp2_jd/src/scalability_benchmark_fortran \
+!!       data/exp2_jd/src/ccpp_kinds.F90 \
+!!       data/exp2_jd/src/kessler.F90 \
+!!       data/exp2_jd/src/scalability_benchmark_fortran.F90
 !!
-!! Run (from project root)
-!! -----------------------
-!!   ./data/src_jd/scalability_benchmark_fortran
+!! Run (from the kessler project root)
+!! -----------------------------------
+!!   mkdir -p _compare_results/outputs/scalability
+!!   ./data/exp2_jd/src/scalability_benchmark_fortran
+!!
+!! Or submit ../LAFT/pbsJobs/compare_scalability_fortran.sh, which does both.
 !!
 
 program scalability_benchmark_fortran
@@ -92,7 +97,7 @@ program scalability_benchmark_fortran
    character(len=256) :: outpath
    integer            :: io_stat
 
-   outpath = 'translations/_compare_results/outputs/scalability/' // &
+   outpath = '_compare_results/outputs/scalability/' // &
              'fortran_scalability_results.json'
 
    ! ---------------------------------------------------------------------------
@@ -126,7 +131,7 @@ program scalability_benchmark_fortran
    if (io_stat /= 0) then
       write(*,*) 'ERROR: cannot open output file: ', trim(outpath)
       write(*,*) '  Make sure the output directory exists:'
-      write(*,*) '  mkdir -p translations/_compare_results/outputs/scalability'
+      write(*,*) '  mkdir -p _compare_results/outputs/scalability'
       stop 1
    end if
 
