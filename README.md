@@ -83,6 +83,10 @@ on another cluster.
 - **GPU scalability and profiling** (`kessler/_compare_results/outputs/plots/`,
   `reports/*_nsys_report_*.md`): produced on A100 GPUs; the reference data
   and the JAX code are in the repository, the timings depend on the hardware.
+- **The OpenACC GPU reference** (`kessler/data/exp2_jd/acc_src/`): the
+  manually accelerated Fortran used in the paper's scalability comparison,
+  with its driver, Makefile, and profiling runner, so its timings can be
+  reproduced and compared with any JAX translation. See its `README.md`.
 
 ## Citation
 

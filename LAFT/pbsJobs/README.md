@@ -22,10 +22,14 @@ these settings.
 | `jax_gpu_profile_trace.sh` | Profiler: `jax.profiler.trace` + XLA HLO dump | 1 GPU |
 | `jax_gpu_profile_nsys.sh` | Profiler: NVIDIA Nsight Systems kernel/memcpy stats | 1 GPU + `nsys` |
 | `pbs_qwen25_translate.sh` | Phase 4: the **paper-1 Qwen translation** — Qwen2.5-Coder-32B-Instruct via vLLM with the April 2026 settings fixed | 2 GPUs |
+| `acc_kessler_profile.sh` | OpenACC reference (`kessler/data/exp2_jd/acc_src/`): timing / memory / nsys profiling of the compiled Fortran binary, one mode per submission | 1 GPU + `nsys` |
+| `acc_kessler_ncol_sweep.sh` | OpenACC reference: per-ncol wall-clock and nsys kernel-time sweep, the OpenACC column of the paper's scalability figure | 1 GPU + `nsys` |
 
 The `jax_*` scripts assume the project layout described in
 `LAFT/docs/architecture.md` and are submitted from the project root, so that
-`PBS_O_WORKDIR` resolves the `out/` tree. `pbs_qwen25_translate.sh` is only
+`PBS_O_WORKDIR` resolves the `out/` tree. The `acc_*` scripts are submitted from the `kessler/` project root and
+expect the OpenACC binary to be built first (`make ARCH=GPU` in
+`data/exp2_jd/acc_src/`). `pbs_qwen25_translate.sh` is only
 needed to re-run the paper's locally hosted Qwen translation; the
 in-context agents (Claude Code, OpenAI Codex, Gemini CLI) author the
 translation in their own session and need no batch job for the LLM call.
@@ -54,6 +58,7 @@ translation in their own session and need no batch job for the LLM call.
    module load conda/latest
    module load ncarenv/24.12      # NCAR site environment
    module load nvhpc/25.9         # only jax_gpu_profile_nsys.sh, for nsys
+   module load ncarenv/25.10 nvhpc/26.1 cuda/12.9.0   # acc_* scripts: nvfortran + nsys
    ```
 
    Replace these with whatever provides `conda`, a CUDA runtime, and (for the

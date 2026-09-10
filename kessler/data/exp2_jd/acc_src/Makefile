@@ -1,0 +1,80 @@
+# ============================================================
+# Minimal Fortran Makefile (explicit ordering, no magic)
+# ============================================================
+#
+# Required modules (load before running make):
+#   module load ncarenv/25.10 nvhpc/26.1 cuda/12.9.0
+#
+# ============================================================
+
+# Compiler: gnu or nvhpc
+#COMPILER ?= gnu
+COMPILER ?= nvhpc
+
+# ------------------------------------------------------------
+# Compiler selection
+# ------------------------------------------------------------
+
+ifeq ($(COMPILER),gnu)
+  FC = gfortran
+  FFLAGS = -O3 -Wall -cpp
+endif
+
+ifeq ($(COMPILER),nvhpc)
+  FC = nvfortran
+  ifeq ($(ARCH),GPU)
+    FFLAGS = -O3 -Mpreprocess -acc -mp=gpu -gpu=mem:separate,math_uniform -DUSE_GPU
+    # Adds detailed information about GPU compilation
+    # FFLAGS += -Minfo=acc  
+  else
+    FFLAGS = -O3 -Mpreprocess
+  endif
+  # In order to match results deactivate the use of FMA
+  FFLAGS += -Mnofma
+endif
+
+# ------------------------------------------------------------
+# Target
+# ------------------------------------------------------------
+
+TARGET = driver_kessler
+
+# ------------------------------------------------------------
+# Build (EXPLICIT ORDER — THIS IS THE KEY)
+# ------------------------------------------------------------
+
+all: $(TARGET)
+
+compare:
+	./$(TARGET) >& test.$(COMPILER).log
+	diff test.$(COMPILER).log golden-nofma.$(COMPILER).log
+
+$(TARGET): ccpp_kinds.o kessler.o kessler_update.o driver_kessler.o
+	$(FC) $(FFLAGS) -o $(TARGET) \
+	    ccpp_kinds.o kessler.o kessler_update.o driver_kessler.o
+
+# Compile in strict dependency order
+
+ccpp_kinds.o: ccpp_kinds.F90
+	$(FC) $(FFLAGS) -c ccpp_kinds.F90
+
+kessler.o: kessler.F90 ccpp_kinds.o
+	$(FC) $(FFLAGS) -c kessler.F90
+
+kessler_update.o: kessler_update.F90 ccpp_kinds.o
+	$(FC) $(FFLAGS) -c kessler_update.F90
+
+driver_kessler.o: driver_kessler.F90 kessler.o kessler_update.o
+	$(FC) $(FFLAGS) -c driver_kessler.F90
+
+# ------------------------------------------------------------
+# ------------------------------------------------------------
+
+clean:
+	rm -f *.o *.mod $(TARGET) test.*.log
+
+load-modules:
+	@echo "Run the following before building:"
+	@echo "  module load ncarenv/25.10 nvhpc/26.1 cuda/12.9.0"
+
+.PHONY: all clean load-modules
