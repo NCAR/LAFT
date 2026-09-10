@@ -88,6 +88,8 @@ on another cluster.
   CPU core, the four translations on one GPU) followed by
   `kessler/_compare_results/plot_Fortran_vs_LLMs_scalability.py`; the
   paper's timing JSONs are archived under `kessler/_compare_results/outputs/scalability/`.
+  The Nsight Systems reports come from `compare_profiling_LLMs.sh` in `nsys`
+  mode, which runs `kessler/_compare_results/LLMx_jd_profiling_run.py`.
 - **The OpenACC GPU reference** (`kessler/data/exp2_jd/acc_src/`): the
   manually accelerated Fortran used in the paper's scalability comparison,
   with its driver, Makefile, and profiling runner, so its timings can be

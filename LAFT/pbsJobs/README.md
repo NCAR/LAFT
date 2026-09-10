@@ -23,6 +23,7 @@ these settings.
 | `jax_gpu_profile_nsys.sh` | Profiler: NVIDIA Nsight Systems kernel/memcpy stats | 1 GPU + `nsys` |
 | `pbs_qwen25_translate.sh` | Phase 4: the **paper-1 Qwen translation** — Qwen2.5-Coder-32B-Instruct via vLLM with the April 2026 settings fixed | 2 GPUs |
 | `compare_scalability_fortran.sh` | Serial Fortran CPU baseline of the scalability figure: compiles and runs `kessler/data/exp2_jd/src/scalability_benchmark_fortran.F90` with gfortran -O2 | 1 CPU |
+| `compare_profiling_LLMs.sh` | The job behind the Nsight Systems reports: `kessler/_compare_results/LLMx_jd_profiling_run.py` over the four archives, one mode per submission (`nsys` by default) | 1 GPU + `nsys` |
 | `compare_scalability_LLMs.sh` | JAX half of the scalability figure: `kessler/_compare_results/scalability_benchmark_LLMs.py` over the four translation archives | 1 GPU |
 | `acc_kessler_profile.sh` | OpenACC reference (`kessler/data/exp2_jd/acc_src/`): timing / memory / nsys profiling of the compiled Fortran binary, one mode per submission | 1 GPU + `nsys` |
 | `acc_kessler_ncol_sweep.sh` | OpenACC reference: per-ncol wall-clock and nsys kernel-time sweep, the OpenACC column of the paper's scalability figure | 1 GPU + `nsys` |

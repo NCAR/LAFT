@@ -1,8 +1,0 @@
-# Regenerable profiler artifacts — large, never committed.
-# The committed evidence is: profile_report.md, profile_state.json, and each
-# iteration's <proc>_{trace,code_info,diagnosis}.json + <proc>_hlo.txt.
-kessler_run_state.pkl
-*_state_*.pkl
-capture_tmp/
-iteration_*/hlo_dump/
-iteration_*/jax_trace*/
