@@ -17,9 +17,6 @@ abstract: >-
   profiling. This repository holds the framework and the Kessler warm-rain
   microphysics case study with four large language models.
 authors:
-  - family-names: Gagne
-    given-names: David J.
-    affiliation: NSF National Center for Atmospheric Research
   - family-names: Linck
     given-names: Iris
     email: ilinck@ucar.edu
@@ -33,6 +30,10 @@ authors:
   - family-names: Stengel
     given-names: Karen
     affiliation: NSF National Center for Atmospheric Research
+  - family-names: Gagne
+    given-names: David J.
+    affiliation: NSF National Center for Atmospheric Research
+
 repository-code: https://github.com/NCAR/LAFT
 doi: 10.5281/zenodo.22696825
 license: Apache-2.0
@@ -50,9 +51,6 @@ preferred-citation:
     Evaluating LLMs for Translating Legacy Fortran Atmospheric Physics to
     GPU-Accelerated JAX
   authors:
-    - family-names: Gagne
-      given-names: David J.
-      affiliation: NSF National Center for Atmospheric Research
     - family-names: Linck
       given-names: Iris
       email: ilinck@ucar.edu
@@ -65,6 +63,9 @@ preferred-citation:
       affiliation: NSF National Center for Atmospheric Research
     - family-names: Stengel
       given-names: Karen
+      affiliation: NSF National Center for Atmospheric Research
+    - family-names: Gagne
+      given-names: David J.
       affiliation: NSF National Center for Atmospheric Research
   year: 2026
   status: preprint

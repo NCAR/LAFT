@@ -100,18 +100,18 @@ If you use this code or data, please cite the paper and the repository. The
 machine-readable metadata is in [`CITATION.cff`](CITATION.cff) (GitHub's
 "Cite this repository" button reads it).
 
-> Gagne, D. J., Linck, I., Dennis, J., Schreck, J., & Stengel, K. (2026).
+> Linck, I., Dennis, J., Schreck, J., Stengel, K., & Gagne, D. J. (2026).
 > Evaluating LLMs for Translating Legacy Fortran Atmospheric Physics to
 > GPU-Accelerated JAX. Preprint submitted to arXiv; manuscript submitted to
 > the Journal of Advances in Modeling Earth Systems (JAMES). Code and data:
 > https://doi.org/10.5281/zenodo.22696825
 
 ```bibtex
-@article{gagne2026laft,
+@article{linck2026laft,
   title   = {Evaluating {LLMs} for Translating Legacy {Fortran} Atmospheric
              Physics to {GPU}-Accelerated {JAX}},
-  author  = {Gagne, David J. and Linck, Iris and Dennis, John and
-             Schreck, John and Stengel, Karen},
+  author  = {Linck, Iris and Dennis, John and Schreck, John and
+             Stengel, Karen and Gagne, David J.},
   year    = {2026},
   note    = {Preprint submitted to arXiv; manuscript submitted to JAMES},
   url     = {https://github.com/NCAR/LAFT},
