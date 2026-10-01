@@ -69,6 +69,17 @@ MAX_ABS_ERR_TOL = {
     "precl":  1e-12,
 }
 
+# Published forward-parity thresholds (Lahlou, Hawkins & Gentine 2026,
+# arXiv:2606.07681, Sec. 3.4): module outputs within a relative tolerance of
+# 1e-4 of the Fortran reference, and relative RMSE below 1%. The source gives
+# no formulas; here rRMSE = RMSE / RMS(Fortran), and the relative error is
+# taken pointwise wherever the Fortran value is nonzero. Reported for
+# comparison with published practice, NOT gated: PASS/FAIL stays on
+# MAX_ABS_ERR_TOL, which is many orders of magnitude tighter.
+PUBLISHED_RRMSE_MAX   = 1e-2
+PUBLISHED_REL_ERR_MAX = 1e-4
+PUBLISHED_REFERENCE   = "Lahlou, Hawkins & Gentine (2026), arXiv:2606.07681"
+
 VARIABLE_UNITS = {
     "theta": ("K", 1.0),
     "qv": ("raw", 1.0),
@@ -124,6 +135,48 @@ def compute_metrics(jax_out: dict, fort_out: dict) -> dict:
             "rel_mae":     float(np.mean(diff) / (np.mean(np.abs(b)) + 1e-30)),
         }
     return metrics
+
+
+def published_threshold_metrics(jax_out: dict, fort_out: dict) -> dict:
+    """Per-variable rRMSE and worst pointwise relative error vs the Fortran
+    reference, each checked against the PUBLISHED_* thresholds.
+
+    Points where the Fortran value is exactly zero have no relative error and
+    are left out of the pointwise test (they still count in the rRMSE). A
+    Fortran field that is zero everywhere has no RMS to normalise by: it is
+    within the thresholds only if the JAX field is zero everywhere too.
+    """
+    out = {}
+    for name, _ in VARIABLES:
+        a    = jax_out[name].astype(np.float64).ravel()
+        b    = fort_out[name].astype(np.float64).ravel()
+        diff = np.abs(a - b)
+
+        rmse    = float(np.sqrt(np.mean(diff**2)))
+        ref_rms = float(np.sqrt(np.mean(b**2)))
+        if ref_rms > 0.0:
+            rrmse = rmse / ref_rms
+        else:
+            rrmse = 0.0 if rmse == 0.0 else float("inf")
+
+        ref_nonzero = b != 0
+        n_rel = int(np.count_nonzero(ref_nonzero))
+        max_rel = (float(np.max(diff[ref_nonzero] / np.abs(b[ref_nonzero])))
+                   if n_rel else 0.0)
+
+        # NaN compares False, so a non-finite metric is never "within".
+        rrmse_ok = bool(rrmse < PUBLISHED_RRMSE_MAX)
+        rel_ok   = bool(max_rel <= PUBLISHED_REL_ERR_MAX)
+        out[name] = {
+            "rrmse":           rrmse,
+            "max_rel_err":     max_rel,
+            "n_rel_points":    n_rel,
+            "n_total":         int(b.size),
+            "rrmse_within":    rrmse_ok,
+            "rel_err_within":  rel_ok,
+            "within":          rrmse_ok and rel_ok,
+        }
+    return out
 
 
 # =============================================================================
@@ -315,6 +368,10 @@ def build_result_json(metrics: dict, fort_out: dict, jax_out: dict,
     bitwise_all = all(v["bitwise_identical"] for v in bitwise.values())
     ulps = [v["max_ulp_diff"] for v in bitwise.values() if v["max_ulp_diff"] is not None]
 
+    # Published thresholds — recorded, deliberately not part of `overall`
+    # (see the PUBLISHED_* constants for why).
+    published = published_threshold_metrics(jax_out, fort_out)
+
     return {
         "stage": "comparison",
         "status": "PASS" if overall else "FAIL",
@@ -328,6 +385,17 @@ def build_result_json(metrics: dict, fort_out: dict, jax_out: dict,
             "jax_physics_all_pass": jax_phys_ok,
             "outputs_fresh_vs_inputs": freshness_ok,
             "all_within_tolerance": metrics_ok,
+        },
+        "published_thresholds": {
+            "gated": False,
+            "note": ("rRMSE and pointwise relative error vs the Fortran "
+                     "reference, reported for comparison with published "
+                     "practice; PASS/FAIL is set by the MAX_ABS_ERR_TOL gates"),
+            "reference": PUBLISHED_REFERENCE,
+            "rrmse_max": PUBLISHED_RRMSE_MAX,
+            "rel_err_max": PUBLISHED_REL_ERR_MAX,
+            "all_variables_within": all(v["within"] for v in published.values()),
+            "per_variable": published,
         },
         "bitwise": {
             "gated": False,
@@ -420,6 +488,37 @@ def build_report(metrics: dict, fort_out: dict, jax_out: dict,
             f"  {name:<10}  {m['mae']:>16.6e}  {m['rmse']:>16.6e}  "
             f"{m['max_abs_err']:>16.6e}  {m['rel_mae']:>10.2e}"
         )
+
+    # --- Published thresholds ---
+    published = published_threshold_metrics(jax_out, fort_out)
+    add("")
+    add("")
+    add("  PUBLISHED THRESHOLDS  (rRMSE and pointwise relative error; reported, not a pass gate)")
+    add("")
+    add(f"  Reference : {PUBLISHED_REFERENCE}")
+    add(f"  Limits    : rRMSE < {PUBLISHED_RRMSE_MAX:.0e}   "
+        f"max relative error <= {PUBLISHED_REL_ERR_MAX:.0e}")
+    add("")
+    add(f"  {'Variable':<10}  {'rRMSE':>16}  {'':>6}  {'Max rel err':>16}  {'':>6}  "
+        f"{'Points (ref != 0)':>20}")
+    add(f"  {'-'*10}  {'-'*16}  {'-'*6}  {'-'*16}  {'-'*6}  {'-'*20}")
+    for name, _ in VARIABLES:
+        p = published[name]
+        add(
+            f"  {name:<10}  {p['rrmse']:>16.6e}  "
+            f"{('OK' if p['rrmse_within'] else 'FAIL'):>6}  "
+            f"{p['max_rel_err']:>16.6e}  "
+            f"{('OK' if p['rel_err_within'] else 'FAIL'):>6}  "
+            f"{p['n_rel_points']:>9d}/{p['n_total']:<10d}"
+        )
+    add("")
+    if all(p["within"] for p in published.values()):
+        add("  All variables are within the published thresholds.")
+    else:
+        outside = [n for n, _ in VARIABLES if not published[n]["within"]]
+        add(f"  Outside the published thresholds: {', '.join(outside)}.")
+    add("  rRMSE = RMSE / RMS(Fortran). The relative error is taken where the Fortran")
+    add("  value is nonzero. Correctness is judged by the MAX_ABS_ERR_TOL gates.")
 
     # --- Bitwise ---
     bitwise = bitwise_metrics(jax_out, fort_out)
