@@ -81,6 +81,7 @@ Summary only:
 | 1 | Bridge | `workflow_bridge/BRIDGE_WORKFLOW.md` | `workflow_bridge/BRIDGE_REFERENCE.md` |
 | 2 | Translate | `workflow_translator/TRANSLATE_WORKFLOW.md` | `workflow_translator/TRANSLATE_REFERENCE.md` |
 | 3 | Profile *(optional)* | `workflow_profiler/PROFILE_WORKFLOW.md` | `workflow_profiler/PROFILER_MANUAL.md` |
+| 4 | Differentiable *(optional, `[differentiable].enabled`)* | `workflow_differentiable/DIFFERENTIABLE_WORKFLOW.md` | `workflow_differentiable/diff_primitives.py` |
 
 Phase-05 validation is **shared** by stages 2 and 3 — it lives in
 `validation/`, documented by `validation/VALIDATION_MANUAL.md`.
@@ -134,6 +135,7 @@ LAFT/
 │                           #   semantic audit, per-external-translator folders
 ├── validation/             # phase 05 validators shared by stages 2 and 3
 ├── workflow_profiler/      # stage 3 — profile → diagnose → fix loop
+├── workflow_differentiable/ # stage 4 (optional) — differentiable variant: primitives + grad gate
 ├── tools/                  # archive/clean housekeeping scripts
 ├── pbsJobs/                # canonical PBS job scripts (edit #PBS headers per project)
 └── docs/                   # this file + architecture, checklist, bridge evolution,
@@ -308,6 +310,7 @@ Instantiation steps: `NEW_PROJECT_CHECKLIST.md`.
 | Translate | `../workflow_translator/TRANSLATE_WORKFLOW.md` | `../workflow_translator/TRANSLATE_REFERENCE.md` |
 | Validation *(shared)* | — | `../validation/VALIDATION_MANUAL.md` |
 | Profile | `../workflow_profiler/PROFILE_WORKFLOW.md` | `../workflow_profiler/PROFILER_MANUAL.md` (+ `headroom_patterns.md`, Step-7 signature → hypothesis table) |
+| Differentiable | `../workflow_differentiable/DIFFERENTIABLE_WORKFLOW.md` | `../workflow_differentiable/diff_primitives.py` (docstrings) |
 
 **Framework-level**
 

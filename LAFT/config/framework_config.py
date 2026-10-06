@@ -241,6 +241,52 @@ class Config:
         Stage 2 runs driver + comparison once per mode listed here."""
         return [self._DRIVER_MODE_BY_CONTRACT[c] for c in self.driver_contracts]
 
+    # ---------------- differentiable variant (optional Stage 4) ----------------
+    # [differentiable] — see workflow_differentiable/DIFFERENTIABLE_WORKFLOW.md.
+    # Section absent or enabled = false: the stage is skipped.
+
+    _DIFFERENTIABLE_DEFAULTS: Dict[str, Any] = {
+        "enabled": False,
+        "report_dir": "differentiable/reports",
+        "loop": "scan",
+        "n_max": 32,
+        "clamp_modes": ["hard", "soft"],
+        "soft_width": 1e-6,
+        "soft_width_sweep": [1e-5, 1e-6, 1e-7, 1e-8],
+        "tol_reference": 1e-12,
+        "tol_ad": 1e-8,
+        "tol_fd": 1e-4,
+        "fd_rel_step": 1e-6,
+        "seed": 0,
+    }
+
+    @property
+    def differentiable_enabled(self) -> bool:
+        return bool(self.section("differentiable").get("enabled", False))
+
+    @property
+    def differentiable(self) -> Dict[str, Any]:
+        """[differentiable] merged over the framework defaults.
+
+        Required when enabled: target_proc, module (the differentiable
+        implementation), adapter (the gate's project hooks), reference (the
+        validated translation the hard mode must reproduce).
+        """
+        d = {**self._DIFFERENTIABLE_DEFAULTS, **self.section("differentiable")}
+        if d["enabled"]:
+            missing = [k for k in ("target_proc", "module", "adapter", "reference")
+                       if not d.get(k)]
+            if missing:
+                raise ValueError(f"[differentiable] is enabled but missing {missing} "
+                                 f"in {self.config_path}")
+            if d["loop"] not in ("scan", "while"):
+                raise ValueError(f"[differentiable].loop must be 'scan' or 'while', got {d['loop']!r}")
+            bad = [m for m in d["clamp_modes"] if m not in ("hard", "soft")]
+            if bad or "hard" not in d["clamp_modes"]:
+                raise ValueError("[differentiable].clamp_modes must include 'hard' and may "
+                                 f"add 'soft'; got {d['clamp_modes']!r}")
+        return d
+
     # ---------------- prompts ----------------
 
     @property

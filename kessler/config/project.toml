@@ -127,6 +127,28 @@ copy_targets = ["claude-sonnet46-jd", "gemini31pro-jd", "gpt54thinking-jd", "qwe
 source            = "in_context"
 llm_label         = "Qwen2.5-32B (Qwen2.5-Coder-32B-Instruct via vLLM; 2026-04 JD-data run, reused)"
 
+[differentiable]                  # workflow_differentiable/ — see DIFFERENTIABLE_WORKFLOW.md
+# Differentiable variant of kessler_run: learnable constants (KesslerParams),
+# scan-based CFL sub-cycling, optional soft clamps. Lives in differentiable/,
+# separate from out/, bridge_test/ and the frozen translations/ archives.
+enabled       = true
+target_proc   = "kessler_run"
+module        = "differentiable/kessler_run_diff.py"
+adapter       = "differentiable/gate_adapter.py"
+# Gemini's translation: the fastest of the four, and byte-identical to GPT and
+# Qwen; the Fortran outputs are checked as well (adapter.fortran_reference).
+reference     = "translations/gemini31pro-jd/jax/kessler_run.validated.py"
+report_dir    = "differentiable/reports"
+loop          = "scan"
+n_max         = 16                # reference case needs 7-9 sub-steps at dt = 60 s
+clamp_modes   = ["hard", "soft"]
+soft_width    = 1e-6              # [kg/kg]; every Kessler clamp acts on a mixing ratio
+soft_width_sweep = [1e-5, 1e-6, 1e-7, 1e-8]
+tol_reference = 1e-12
+tol_ad        = 1e-8
+tol_fd        = 1e-4
+fd_rel_step   = 1e-6
+
 [profiler]                        # workflow_profiler/ — see PROFILE_WORKFLOW.md
 target_proc   = "kessler_run"                   # kessler_init is scalar-only,
                                                  # nothing to profile there
