@@ -67,6 +67,18 @@ The batch jobs in `LAFT/pbsJobs/` are written for NCAR's Derecho and Casper
 systems (PBS Pro, NVIDIA A100). `LAFT/pbsJobs/README.md` lists what to change
 on another cluster.
 
+## Differentiable variant (optional Stage 4)
+
+The validated translations support forward-mode AD but not `jax.grad`: their
+CFL sub-cycling is a data-dependent `while_loop`. The optional Stage 4
+(`LAFT/workflow_differentiable/`, enabled per project by `[differentiable]` in
+`config/project.toml`) derives a separate differentiable variant. It makes the
+physics constants learnable parameters, runs the sub-cycling as a masked scan,
+and adds optional soft clamps. In its default mode it is gated to reproduce
+the validated translation and the Fortran to round-off. The Kessler instance
+is in [`kessler/differentiable/`](kessler/differentiable/); it does not modify
+the paper's translations.
+
 ## Reproducing the paper's numbers
 
 - **Accuracy** (`kessler/_compare_results/outputs/reports/performance_comparison_2026-04-08.md`,

@@ -211,6 +211,27 @@ nvtx_label      = "TODO_profiled_calls"
 profile_trace_job = "pbsJobs/jax_gpu_profile_trace.sh"
 profile_nsys_job  = "pbsJobs/jax_gpu_profile_nsys.sh"
 
+[differentiable]                  # workflow_differentiable/ — see DIFFERENTIABLE_WORKFLOW.md
+# Optional Stage 4: a reverse-mode-differentiable variant of a validated
+# translation, with the physics constants as learnable parameters and optional
+# soft clamps. Hand-authored (or agent-authored) per project, kept OUTSIDE out/
+# and translations/ so the validated translation is never modified.
+enabled       = false
+target_proc   = "TODO"                          # procedure made differentiable
+module        = "differentiable/TODO_diff.py"   # the differentiable implementation
+adapter       = "differentiable/gate_adapter.py"  # gate hooks (load_case/run/...)
+reference     = "translations/TODO/jax/TODO.validated.py"  # what hard mode must reproduce
+report_dir    = "differentiable/reports"
+loop          = "scan"            # "scan" (reverse-mode AD) | "while" (forward only)
+n_max         = 32                # static sub-step / iteration budget for the scan
+clamp_modes   = ["hard", "soft"]  # modes the gate checks; "hard" is mandatory
+soft_width    = 1e-6              # softplus width for clamp="soft" (units of the clamped quantity)
+soft_width_sweep = [1e-5, 1e-6, 1e-7, 1e-8]   # soft -> hard convergence check
+tol_reference = 1e-12             # max-abs, scaled per field, hard mode vs reference
+tol_ad        = 1e-8              # reverse vs forward mode, relative
+tol_fd        = 1e-4              # reverse mode vs central finite differences, relative
+fd_rel_step   = 1e-6              # FD step relative to each parameter value
+
 [bridge]                          # module-var signature policy (phase03/04/05)
 # Module vars dropped from every generated signature project-wide: judgment
 # calls the dependency analysis cannot make (e.g. error-status globals the

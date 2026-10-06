@@ -1,7 +1,7 @@
 # LAFT Orchestrator — run the Fortran→JAX pipeline for this project
 
 You are orchestrating the LAFT pipeline for one project. The pipeline is four
-stages, each with its own authoritative playbook. **This document is the entry
+stages plus an optional differentiable-variant stage, each with its own authoritative playbook. **This document is the entry
 point**: it gives the stage order, the hand-off gate between each, and how to
 run the **whole pipeline** or **just one stage**. It only *sequences* the
 stages — always follow each stage's own playbook for the actual steps, resume
@@ -66,9 +66,14 @@ jobs.)
 | 1 | **Bridge** | `workflow_bridge/BRIDGE_WORKFLOW.md` | generate + gate the Fortran↔JAX bridge | `out/reports/bridge/bridge_test_results.json` → `"status": "PASS"` |
 | 2 | **Translate** | `workflow_translator/TRANSLATE_WORKFLOW.md` | author (4 passes) → **completeness check (scaffold = STOP, human decision)** → validate (lint→**semantic audit (gated)**→runtime→driver→comparison) | comparison `ALL PASS` **in every driver mode declared by `[driver].contracts`** (TRANSLATE_WORKFLOW §5.0), `out/reports/translation/translation_report.md` written **with both statistics tables** (below) |
 | 3 | **Profile** *(optional)* | `workflow_profiler/PROFILE_WORKFLOW.md` | GPU-efficiency profile→diagnose→fix loop | diagnosis `production_ready` |
+| 4 | **Differentiable** *(optional; `[differentiable].enabled`)* | `workflow_differentiable/DIFFERENTIABLE_WORKFLOW.md` | derive a reverse-mode-differentiable variant (learnable constants, optional soft clamps) in `differentiable/`, gated against the validated translation | `<report_dir>/grad_gate_results.json` → `"status": "PASS"` + `differentiable/tests` pass |
 
 A stage hands off to the next only when its gate is green. Stage 3 is optional:
 run it when you want GPU efficiency; skip it if numerically-correct JAX is enough.
+Stage 4 is optional too, and runs only when `[differentiable].enabled = true`:
+run it when you need `jax.grad` (parameter learning, calibration, adjoints).
+It depends on Stage 2 only, not on Stage 3, and never modifies the validated
+translation: the variant lives in the project's `differentiable/` folder.
 
 ## Step 0 — Decide what to run
 
@@ -82,6 +87,7 @@ Pick the scenario that matches, then run only the stages it lists:
 | **Generator changed** (phase02/03/04 logic) | re-run from the earliest changed stage forward |
 | **Re-run one stage** | jump to it after confirming its entry gate (below) |
 | **Just profile a finished translation** | 3 only (translator must be complete) |
+| **Make a finished translation differentiable** | 4 only (translator must be complete; set `[differentiable]`) |
 
 ## Run the full pipeline
 
@@ -99,7 +105,11 @@ previous stage's gate is green **and** the user has approved continuing.
    translation at its Step 4.5.)
    → gate green? report + **get approval** → then:
 4. **Profile** *(optional)* — follow `workflow_profiler/PROFILE_WORKFLOW.md`.
-   → then, and only then, **archive** (below).
+   → gate green? report + **get approval** → then:
+5. **Differentiable** *(optional, if `[differentiable].enabled`)* — follow
+   `workflow_differentiable/DIFFERENTIABLE_WORKFLOW.md`.
+   → then, and only then, **archive** (below). Stage 4's output lives in
+   `differentiable/`, outside `out/`, so archiving neither needs nor touches it.
 
 A failed gate at any stage ends the run — stop and report; do not continue.
 Inside Stage 2, a **scaffolded procedure** (TRANSLATE_WORKFLOW §2.5,
@@ -169,6 +179,7 @@ Follow only that stage's playbook, after confirming its **entry gate**:
 | Bridge | frontend outputs present (packets + `phase1_index.json`) |
 | Translate | bridge gate is `PASS` (`out/reports/bridge/bridge_test_results.json`); if `[driver].contracts` declares contract 2, the project driver implements the `LAFT_DRIVER_MODE` switch (TRANSLATE_WORKFLOW §5.0 fail-fast) |
 | Profile | translator complete (validated `.validated.py` snapshot, comparison green) |
+| Differentiable | translator complete (as Profile) + `[differentiable]` enabled with `target_proc`, `module`, `adapter`, `reference` |
 
 If an entry gate is not met, run the earlier stage(s) first.
 
@@ -203,6 +214,10 @@ config/project.toml
 [0] FRONTEND ─packets─⏸─► [1] BRIDGE ─PASS─⏸─► [2] TRANSLATE ─ALL PASS─⏸─► [3] PROFILE (opt)
  parse/extract            gen + gate           author + validate           GPU efficiency
  FRONTEND_WORKFLOW.md     BRIDGE_WORKFLOW.md   TRANSLATE_WORKFLOW.md        PROFILE_WORKFLOW.md
+                                                       │
+                                                       └─⏸─► [4] DIFFERENTIABLE (opt, [differentiable].enabled)
+                                                             learnable constants + jax.grad, gated vs validated
+                                                             DIFFERENTIABLE_WORKFLOW.md  → differentiable/
                                                        │                          │
                                                        └──── ARCHIVE LAST ────────┘
                                                     tools/copy_AI_results.sh <llm>
@@ -211,5 +226,6 @@ config/project.toml
 
 **Pointers:** each stage's playbook is authoritative for its own steps.
 Shared validators: `validation/VALIDATION_MANUAL.md`. Profiler reference
-manual: `workflow_profiler/PROFILER_MANUAL.md`. Config schema:
+manual: `workflow_profiler/PROFILER_MANUAL.md`. Differentiable primitives:
+`workflow_differentiable/diff_primitives.py`. Config schema:
 `config/project.toml` (+ `LAFT/config/project.template.toml`).
