@@ -21,6 +21,18 @@ Workflow
     python tools/compare_fortran_jax.py
 
     # 3. Check the report in terminal and also saved to out/driver/compare_results_fortran_jax.txt
+
+Acceptance criterion (2026-10-02)
+---------------------------------
+For every output variable v the script computes, JAX vs Fortran: the mean absolute
+error (MAE), the root-mean-square error (RMSE) and the maximum absolute difference
+E_v = max_i |x^J_{v,i} - x^F_{v,i}|. The translation is accepted when, for every v,
+E_v <= eps_v, where eps_v is the ENVELOPE: the maximum absolute difference found
+between different builds (compilers / flags) of the Fortran reference itself. The
+envelope values are supplied by the project in config/project.toml, table
+[comparison.envelope], one value per variable, measured by
+an experiment outside the framework (described in the paper). Without that table the
+comparison cannot pass. The physics and shape checks are unchanged.
 """
 
 import sys
@@ -56,29 +68,20 @@ VARIABLES = [
     ("relhum", True),
 ]
 
-# Per-variable max-abs-error tolerance gates (editable). Derived from
-# TRANSLATE_WORKFLOW.md: theta/relhum near ~1e-13, mixing ratios near ~1e-17 on a
-# unit-scale grid; "MAE > ~1e-10 suspects a bug". These are conservative ceilings
-# above which the diff is treated as a real disagreement, not round-off.
-MAX_ABS_ERR_TOL = {
-    "theta":  1e-9,
-    "relhum": 1e-9,
-    "qv":     1e-12,
-    "qc":     1e-12,
-    "qr":     1e-12,
-    "precl":  1e-12,
-}
+# Acceptance gate: E_v <= eps_v per variable, where eps_v (the envelope) comes
+# from config/project.toml, table [comparison.envelope]. The project supplies
+# these values from its own Fortran-vs-Fortran measurement; nothing is chosen
+# here. Replaced the hand-set MAX_ABS_ERR_TOL (1e-9 / 1e-12) on 2026-10-02.
+PROJECT_CONFIG   = PROJECT_ROOT / "config" / "project.toml"
+ENVELOPE_SECTION = "comparison.envelope"
 
-# Published forward-parity thresholds (Lahlou, Hawkins & Gentine 2026,
-# arXiv:2606.07681, Sec. 3.4): module outputs within a relative tolerance of
-# 1e-4 of the Fortran reference, and relative RMSE below 1%. The source gives
-# no formulas; here rRMSE = RMSE / RMS(Fortran), and the relative error is
-# taken pointwise wherever the Fortran value is nonzero. Reported for
-# comparison with published practice, NOT gated: PASS/FAIL stays on
-# MAX_ABS_ERR_TOL, which is many orders of magnitude tighter.
-PUBLISHED_RRMSE_MAX   = 1e-2
-PUBLISHED_REL_ERR_MAX = 1e-4
-PUBLISHED_REFERENCE   = "Lahlou, Hawkins & Gentine (2026), arXiv:2606.07681"
+
+def _config_label() -> str:
+    """config path as shown in reports: relative to the project when possible."""
+    try:
+        return str(PROJECT_CONFIG.relative_to(PROJECT_ROOT))
+    except ValueError:
+        return str(PROJECT_CONFIG)
 
 VARIABLE_UNITS = {
     "theta": ("K", 1.0),
@@ -118,11 +121,41 @@ def load_outputs(folder: Path, ncol: int, nz: int) -> dict:
     return out
 
 
+def load_envelope() -> dict:
+    """Read [comparison.envelope] from config/project.toml: {variable: eps_v}.
+
+    Minimal TOML reading (the validation env is Python 3.10, no tomllib): the
+    table is plain `name = number` lines. Returns {} when the table is absent,
+    which the gate treats as "no envelope supplied" = cannot pass. Variables
+    missing from the table are reported the same way.
+    """
+    env = {}
+    if not PROJECT_CONFIG.exists():
+        return env
+    in_section = False
+    for raw in PROJECT_CONFIG.read_text(encoding="utf-8").splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if not line:
+            continue
+        if line.startswith("["):
+            in_section = line == f"[{ENVELOPE_SECTION}]"
+            continue
+        if in_section and "=" in line:
+            key, val = (s.strip() for s in line.split("=", 1))
+            try:
+                env[key.strip('"')] = float(val)
+            except ValueError:
+                pass
+    return env
+
+
 # =============================================================================
 # Metrics
 # =============================================================================
 
 def compute_metrics(jax_out: dict, fort_out: dict) -> dict:
+    """Per variable, JAX vs Fortran: MAE, RMSE and the maximum absolute
+    difference E_v (the acceptance metric)."""
     metrics = {}
     for name, _ in VARIABLES:
         a    = jax_out[name].astype(np.float64)
@@ -132,50 +165,27 @@ def compute_metrics(jax_out: dict, fort_out: dict) -> dict:
             "mae":         float(np.mean(diff)),
             "rmse":        float(np.sqrt(np.mean(diff**2))),
             "max_abs_err": float(np.max(diff)),
-            "rel_mae":     float(np.mean(diff) / (np.mean(np.abs(b)) + 1e-30)),
         }
     return metrics
 
 
-def published_threshold_metrics(jax_out: dict, fort_out: dict) -> dict:
-    """Per-variable rRMSE and worst pointwise relative error vs the Fortran
-    reference, each checked against the PUBLISHED_* thresholds.
+def envelope_gate(metrics: dict, envelope: dict) -> dict:
+    """Per variable: E_v, eps_v, their ratio and the verdict E_v <= eps_v.
 
-    Points where the Fortran value is exactly zero have no relative error and
-    are left out of the pointwise test (they still count in the rRMSE). A
-    Fortran field that is zero everywhere has no RMS to normalise by: it is
-    within the thresholds only if the JAX field is zero everywhere too.
+    A variable without an envelope value gets eps_v = None and does not pass:
+    the criterion needs a measured envelope for every variable.
     """
     out = {}
     for name, _ in VARIABLES:
-        a    = jax_out[name].astype(np.float64).ravel()
-        b    = fort_out[name].astype(np.float64).ravel()
-        diff = np.abs(a - b)
-
-        rmse    = float(np.sqrt(np.mean(diff**2)))
-        ref_rms = float(np.sqrt(np.mean(b**2)))
-        if ref_rms > 0.0:
-            rrmse = rmse / ref_rms
+        e_v  = metrics[name]["max_abs_err"]
+        eps  = envelope.get(name)
+        if eps is None:
+            ratio, ok = None, False
         else:
-            rrmse = 0.0 if rmse == 0.0 else float("inf")
-
-        ref_nonzero = b != 0
-        n_rel = int(np.count_nonzero(ref_nonzero))
-        max_rel = (float(np.max(diff[ref_nonzero] / np.abs(b[ref_nonzero])))
-                   if n_rel else 0.0)
-
-        # NaN compares False, so a non-finite metric is never "within".
-        rrmse_ok = bool(rrmse < PUBLISHED_RRMSE_MAX)
-        rel_ok   = bool(max_rel <= PUBLISHED_REL_ERR_MAX)
-        out[name] = {
-            "rrmse":           rrmse,
-            "max_rel_err":     max_rel,
-            "n_rel_points":    n_rel,
-            "n_total":         int(b.size),
-            "rrmse_within":    rrmse_ok,
-            "rel_err_within":  rel_ok,
-            "within":          rrmse_ok and rel_ok,
-        }
+            ratio = (e_v / eps) if eps > 0 else (0.0 if e_v == 0.0 else float("inf"))
+            ok = bool(e_v <= eps)
+        out[name] = {"max_abs_err": e_v, "envelope": eps, "ratio": ratio,
+                     "within_envelope": ok}
     return out
 
 
@@ -204,8 +214,8 @@ def published_threshold_metrics(jax_out: dict, fort_out: dict) -> dict:
 #
 # Reported, NOT gated: an independent Fortran and JAX implementation agreeing
 # to a few ULP is the expected, correct outcome — different summation order in
-# a reduction is enough to move the last bit. PASS/FAIL stays on the tolerance
-# gates in MAX_ABS_ERR_TOL. Bit-identity is evidence, not the criterion.
+# a reduction is enough to move the last bit. PASS/FAIL stays on the envelope
+# gate (E_v <= eps_v). Bit-identity is evidence, not the criterion.
 
 
 def _total_order_key(x: np.ndarray) -> np.ndarray:
@@ -324,12 +334,12 @@ def identity_self_test(fort_out: dict) -> dict:
     return {"max_abs_err": float(worst), "passed": worst == 0.0}
 
 
-def build_result_json(metrics: dict, fort_out: dict, jax_out: dict,
+def build_result_json(metrics: dict, envelope: dict, fort_out: dict, jax_out: dict,
                       ncol: int, nz: int, meta: dict) -> dict:
     """Assemble the machine-readable comparison result with a computed PASS/FAIL.
 
     The text report + PBS log remain authoritative; this encodes the documented
-    invariants and tolerance gates so the outcome is machine-checkable too.
+    invariants and the envelope gate so the outcome is machine-checkable too.
     """
     shapes = shape_consistency(jax_out, fort_out)
     shapes_ok = all(s["match"] for s in shapes.values())
@@ -350,16 +360,16 @@ def build_result_json(metrics: dict, fort_out: dict, jax_out: dict,
     freshness_ok = (fresh["fortran_mtime"] >= fresh["inputs_mtime"]
                     and fresh["jax_mtime"] >= fresh["inputs_mtime"])
 
-    per_var = {}
-    metrics_ok = True
-    for name, _ in VARIABLES:
-        tol = MAX_ABS_ERR_TOL.get(name, 1e-9)
-        ok = metrics[name]["max_abs_err"] <= tol
-        metrics_ok = metrics_ok and ok
-        per_var[name] = {**metrics[name], "tol_max_abs_err": tol, "within_tol": ok}
+    gate = envelope_gate(metrics, envelope)
+    envelope_supplied = all(gate[n]["envelope"] is not None for n, _ in VARIABLES)
+    metrics_ok = all(gate[n]["within_envelope"] for n, _ in VARIABLES)
+    per_var = {name: {**metrics[name], "envelope": gate[name]["envelope"],
+                      "ratio": gate[name]["ratio"],
+                      "within_envelope": gate[name]["within_envelope"]}
+               for name, _ in VARIABLES}
 
     overall = (shapes_ok and self_test["passed"] and fort_phys_ok
-               and jax_phys_ok and freshness_ok and metrics_ok)
+               and jax_phys_ok and freshness_ok and envelope_supplied and metrics_ok)
 
     # Exact bit comparison — recorded, deliberately not part of `overall`
     # (see the Bitwise comparison section header for why).
@@ -367,10 +377,6 @@ def build_result_json(metrics: dict, fort_out: dict, jax_out: dict,
     digests = file_digests()
     bitwise_all = all(v["bitwise_identical"] for v in bitwise.values())
     ulps = [v["max_ulp_diff"] for v in bitwise.values() if v["max_ulp_diff"] is not None]
-
-    # Published thresholds — recorded, deliberately not part of `overall`
-    # (see the PUBLISHED_* constants for why).
-    published = published_threshold_metrics(jax_out, fort_out)
 
     return {
         "stage": "comparison",
@@ -384,24 +390,20 @@ def build_result_json(metrics: dict, fort_out: dict, jax_out: dict,
             "fortran_physics_all_pass": fort_phys_ok,
             "jax_physics_all_pass": jax_phys_ok,
             "outputs_fresh_vs_inputs": freshness_ok,
-            "all_within_tolerance": metrics_ok,
+            "envelope_supplied": envelope_supplied,
+            "all_within_envelope": metrics_ok,
         },
-        "published_thresholds": {
-            "gated": False,
-            "note": ("rRMSE and pointwise relative error vs the Fortran "
-                     "reference, reported for comparison with published "
-                     "practice; PASS/FAIL is set by the MAX_ABS_ERR_TOL gates"),
-            "reference": PUBLISHED_REFERENCE,
-            "rrmse_max": PUBLISHED_RRMSE_MAX,
-            "rel_err_max": PUBLISHED_REL_ERR_MAX,
-            "all_variables_within": all(v["within"] for v in published.values()),
-            "per_variable": published,
+        "acceptance_criterion": {
+            "rule": "max_abs_err (E_v) <= envelope (eps_v) for every output variable",
+            "metric": "E_v = max_i |x_jax_i - x_fortran_i|",
+            "envelope_source": f"{_config_label()} [{ENVELOPE_SECTION}]",
+            "envelope": {n: gate[n]["envelope"] for n, _ in VARIABLES},
         },
         "bitwise": {
             "gated": False,
             "note": ("exact IEEE-754 bit comparison of the float64 outputs, "
                      "reported as evidence; PASS/FAIL is set by the "
-                     "MAX_ABS_ERR_TOL gates"),
+                     "envelope gate"),
             "all_variables_bit_identical": bitwise_all,
             "worst_max_ulp_diff": (max(ulps) if ulps else None),
             "per_variable": bitwise,
@@ -426,7 +428,7 @@ def write_result_json(result: dict) -> None:
 # Report builder
 # =============================================================================
 
-def build_report(metrics: dict, fort_out: dict, jax_out: dict,
+def build_report(metrics: dict, envelope: dict, fort_out: dict, jax_out: dict,
                  ncol: int, nz: int, meta: dict) -> str:
     lines = []
 
@@ -480,45 +482,43 @@ def build_report(metrics: dict, fort_out: dict, jax_out: dict,
     add("")
     add("  NUMERICAL ACCURACY  (JAX vs Fortran)")
     add("")
-    add(f"  {'Variable':<10}  {'MAE':>16}  {'RMSE':>16}  {'Max|Err|':>16}  {'Rel MAE':>10}")
-    add(f"  {'-'*10}  {'-'*16}  {'-'*16}  {'-'*16}  {'-'*10}")
+    add(f"  {'Variable':<10}  {'MAE':>16}  {'RMSE':>16}  {'Max|Err| (E_v)':>16}")
+    add(f"  {'-'*10}  {'-'*16}  {'-'*16}  {'-'*16}")
     for name, _ in VARIABLES:
         m = metrics[name]
-        add(
-            f"  {name:<10}  {m['mae']:>16.6e}  {m['rmse']:>16.6e}  "
-            f"{m['max_abs_err']:>16.6e}  {m['rel_mae']:>10.2e}"
-        )
+        add(f"  {name:<10}  {m['mae']:>16.6e}  {m['rmse']:>16.6e}  {m['max_abs_err']:>16.6e}")
 
-    # --- Published thresholds ---
-    published = published_threshold_metrics(jax_out, fort_out)
+    # --- Acceptance criterion: E_v <= eps_v ---
+    gate = envelope_gate(metrics, envelope)
     add("")
     add("")
-    add("  PUBLISHED THRESHOLDS  (rRMSE and pointwise relative error; reported, not a pass gate)")
+    add("  ACCEPTANCE CRITERION  (E_v <= envelope eps_v for every variable; this is the pass gate)")
     add("")
-    add(f"  Reference : {PUBLISHED_REFERENCE}")
-    add(f"  Limits    : rRMSE < {PUBLISHED_RRMSE_MAX:.0e}   "
-        f"max relative error <= {PUBLISHED_REL_ERR_MAX:.0e}")
+    add(f"  Envelope source : {_config_label()} [{ENVELOPE_SECTION}]")
+    add("  eps_v = maximum absolute difference found between different builds of the")
+    add("  Fortran reference itself (compilers / flags), measured outside the framework.")
     add("")
-    add(f"  {'Variable':<10}  {'rRMSE':>16}  {'':>6}  {'Max rel err':>16}  {'':>6}  "
-        f"{'Points (ref != 0)':>20}")
-    add(f"  {'-'*10}  {'-'*16}  {'-'*6}  {'-'*16}  {'-'*6}  {'-'*20}")
+    add(f"  {'Variable':<10}  {'E_v (JAX-Fortran)':>18}  {'eps_v (envelope)':>18}  "
+        f"{'E_v / eps_v':>12}  {'Verdict':>8}")
+    add(f"  {'-'*10}  {'-'*18}  {'-'*18}  {'-'*12}  {'-'*8}")
     for name, _ in VARIABLES:
-        p = published[name]
-        add(
-            f"  {name:<10}  {p['rrmse']:>16.6e}  "
-            f"{('OK' if p['rrmse_within'] else 'FAIL'):>6}  "
-            f"{p['max_rel_err']:>16.6e}  "
-            f"{('OK' if p['rel_err_within'] else 'FAIL'):>6}  "
-            f"{p['n_rel_points']:>9d}/{p['n_total']:<10d}"
-        )
+        g = gate[name]
+        eps = "not supplied" if g["envelope"] is None else f"{g['envelope']:.6e}"
+        rat = "n/a" if g["ratio"] is None else f"{g['ratio']:.3f}"
+        add(f"  {name:<10}  {g['max_abs_err']:>18.6e}  {eps:>18}  {rat:>12}  "
+            f"{('OK' if g['within_envelope'] else 'FAIL'):>8}")
     add("")
-    if all(p["within"] for p in published.values()):
-        add("  All variables are within the published thresholds.")
+    missing = [n for n, _ in VARIABLES if gate[n]["envelope"] is None]
+    if missing:
+        add(f"  No envelope value for: {', '.join(missing)}. The criterion cannot be")
+        add(f"  evaluated; add [{ENVELOPE_SECTION}] to config/project.toml with one value")
+        add("  per variable (the measurement is described in the paper).")
+    elif all(gate[n]["within_envelope"] for n, _ in VARIABLES):
+        add("  All variables are within the envelope: the translation differs from the")
+        add("  Fortran reference by no more than the Fortran differs from itself.")
     else:
-        outside = [n for n, _ in VARIABLES if not published[n]["within"]]
-        add(f"  Outside the published thresholds: {', '.join(outside)}.")
-    add("  rRMSE = RMSE / RMS(Fortran). The relative error is taken where the Fortran")
-    add("  value is nonzero. Correctness is judged by the MAX_ABS_ERR_TOL gates.")
+        outside = [n for n, _ in VARIABLES if not gate[n]["within_envelope"]]
+        add(f"  Outside the envelope: {', '.join(outside)}.")
 
     # --- Bitwise ---
     bitwise = bitwise_metrics(jax_out, fort_out)
@@ -549,7 +549,7 @@ def build_report(metrics: dict, fort_out: dict, jax_out: dict,
         add(f"  Not bit-identical. Worst disagreement: {worst} ULP "
             f"(1 ULP = the last mantissa bit, the smallest representable difference).")
         add("  Expected for an independent implementation: reduction/order differences")
-        add("  move the final bit. Correctness is judged by the tolerance gates above.")
+        add("  move the final bit. Correctness is judged by the envelope gate above.")
 
     # --- Physics sanity ---
     add("")
@@ -630,8 +630,15 @@ def main():
         print("[3] Computing metrics...")
         metrics = compute_metrics(jax_out, fort_out)
         print("   OK")
+        envelope = load_envelope()
+        if envelope:
+            print(f"   Envelope read from {_config_label()} "
+                  f"[{ENVELOPE_SECTION}]: {len(envelope)} variable(s)")
+        else:
+            print(f"   WARNING: no [{ENVELOPE_SECTION}] table in "
+                  f"{_config_label()} -> the comparison cannot PASS")
 
-        report_text = build_report(metrics, fort_out, jax_out, ncol, nz, meta)
+        report_text = build_report(metrics, envelope, fort_out, jax_out, ncol, nz, meta)
 
         # Keep printing to terminal
         print(report_text)
@@ -641,7 +648,7 @@ def main():
         print(f"Saved comparison report to: {REPORT_FILE}")
 
         # Machine-readable result with computed PASS/FAIL (convenience artifact).
-        result = build_result_json(metrics, fort_out, jax_out, ncol, nz, meta)
+        result = build_result_json(metrics, envelope, fort_out, jax_out, ncol, nz, meta)
         write_result_json(result)
         print(f"Saved comparison result JSON to: {RESULT_JSON}  (status={result['status']})")
     except Exception:

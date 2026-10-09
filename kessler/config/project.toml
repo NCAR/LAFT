@@ -49,6 +49,31 @@ contracts = [1]  # pinned 2026-08-21 (host arrays in/out); procedure: LAFT/docs/
 # max-abs-error tolerances (set inside the script).
 script = "out/driver/kessler_compare_fortran_jax.py"
 
+# [comparison.envelope] — acceptance thresholds eps_v, one per output variable:
+# the largest maximum absolute difference found between builds of the same
+# Fortran scheme (compilers, optimisation levels, FMA on/off, CPU and GPU) on
+# the same frozen inputs, one call to kessler_run. The comparison script
+# accepts a translation only if E_v = max|x_jax - x_fortran| <= eps_v for every
+# variable. The factor is 1 (the envelope itself, no safety margin). The
+# measurement is outside the framework and is described in the paper; LAFT
+# only reads the values. Measured 2026-10-02.
+[comparison.envelope]
+theta  = 1.137e-13
+qv     = 7.112e-17
+qc     = 5.725e-17
+qr     = 3.296e-17
+precl  = 1.355e-19
+relhum = 9.805e-13
+
+[comparison.data]                 # shared metrics engine, validation/compare_metrics.py
+# Data layout for the FRAMEWORK's metrics (no pass/fail; the criterion above
+# stays in [comparison].script). Per-variable text files, same name on both
+# sides. Writes out/driver/compare_metrics.{json,txt} before the script runs.
+format    = "per_variable_files"
+reference = "data/exp2_jd/fortran_io/outputs"
+jax       = "out/driver"
+variables = ["theta", "qv", "qc", "qr", "precl", "relhum"]
+
 [prompts]
 # Directory holding the translation policy files
 policies_dir = "workflow_translator/prompt_policies"

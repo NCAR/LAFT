@@ -34,6 +34,10 @@ SRC = REPO / "kessler"
 HAND = "bridge_test/test_kessler_run_bridge_layout.py"
 GENERIC = "workflow_bridge/test_generated_bridge_layout.py"
 BRIDGE = "out/bridge/kessler_run_bridge.py"
+# The hand-written file was retired from kessler/bridge_test on 2026-10-09 (superseded
+# by the shared file). The check reads it from this repository's history so it stays
+# reproducible: this is the last commit that carried it.
+HAND_COMMIT = "2455961"
 
 
 def build_scratch(scratch: Path):
@@ -49,7 +53,12 @@ def build_scratch(scratch: Path):
     shutil.copy(SRC / "out/phase1_index.json", scratch / "out/phase1_index.json")
     (scratch / "out/reports/bridge").mkdir(parents=True)
     (scratch / "bridge_test").mkdir()
-    shutil.copy(SRC / HAND, scratch / HAND)
+    if (SRC / HAND).exists():
+        shutil.copy(SRC / HAND, scratch / HAND)
+    else:
+        text = subprocess.run(["git", "-C", str(REPO), "show", f"{HAND_COMMIT}:kessler/{HAND}"],
+                              capture_output=True, text=True, check=True).stdout
+        (scratch / HAND).write_text(text, encoding="utf-8")
     os.symlink(LAFT / "workflow_bridge", scratch / "workflow_bridge")
 
 
