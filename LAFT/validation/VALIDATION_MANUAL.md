@@ -45,6 +45,7 @@ directory containing `config/`).
 | Tool | Checks | Runs where |
 |---|---|---|
 | `phase05_01_lint_translation.py` | **Static** structure/JIT-rules lint of `out/jax/*.py`: JAX-only (no NumPy), the `{proc}_core` + `{proc}` two-layer contract for array procs, scalar-JAX vs scalar-Python contracts, no host compute loops, and **bridge/JAX signature consistency** (the generated bridge's call must match the translation's `def`). Writes `out/lint/{proc}_lint.json` + `out/lint/_summary.json`. | Login node, local, fast |
+| `compare_metrics.py` | **Comparison metrics**, no pass/fail: reads the reference Fortran output and the JAX driver output declared in `[comparison.data]` and computes, per variable, max abs error E_v (and where), MAE, RMSE, rRMSE, correlation, min/max, non-zero counts, bitwise identity + ULP distance, match at the reference's own digits, file sha256, plus an identity self-test. Writes `out/driver/compare_metrics.{json,txt}`. Run by `pbsJobs/jax_gpu_compvalues.sh` before the project's `[comparison].script`, which owns the criterion (Part 3). | Comparison PBS job (CPU, seconds); also standalone from the project root |
 | `phase05_02_runtime_validate.py` | **Runtime** import/execute smoke test: builds inputs from packet metadata, calls each `{proc}` wrapper (through the bridge when present) and `{proc}_core` under `jax.jit`, checks `imported/wrapper_ok/core_ok` and finiteness. Writes `out/validation/{proc}_runtime.json`. | GPU node via `pbsJobs/jax_gpu_runtimevalid.sh` |
 
 Both import `framework_config` from the shared `config/` dir (via the standard
@@ -65,16 +66,19 @@ resolved from `config/framework_config.py`, not hard-coded.
   translator, not here. Their gate (`workflow_translator/audit_gate.py`) is
   what `pbsJobs/jax_gpu_runtimevalid.sh` consults before the runtime
   validator in this folder is allowed to run.
-- **Bridge test suite** — the project's `bridge_test/test_*_layout.py` suite,
-  run through `workflow_bridge/run_bridge_tests.py`. It is the bridge stage's
-  own gate (and is re-run against the real translation at TRANSLATE_WORKFLOW
-  Step 4.5), so it lives with the bridge workflow.
-- **Driver + comparison** — the end-to-end Fortran-vs-JAX numerical check. The
-  driver and comparison scripts are **hand-authored per project**
-  (`[driver].script`, `[comparison].script`, living in `out/driver/`), and are
-  launched by per-project PBS jobs (`<[hpc].driver_job>`,
-  `pbsJobs/jax_gpu_compvalues.sh`). There is no shared driver *tool* to house
-  here — only the lint and runtime validators generalize across projects.
+- **Bridge test suite** — the shared `workflow_bridge/test_generated_bridge_*.py`
+  + `test_direction_symmetry.py` files (plus optional per-project additions in
+  `bridge_test/`), run through `workflow_bridge/run_bridge_tests.py`. It is the
+  bridge stage's own gate (and is re-run against the real translation at
+  TRANSLATE_WORKFLOW Step 4.5), so it lives with the bridge workflow.
+- **Driver + comparison criterion** — the end-to-end Fortran-vs-JAX numerical
+  check. The driver and the comparison script are **hand-authored per
+  project** (`[driver].script`, `[comparison].script`, living in
+  `out/driver/`), launched by per-project PBS jobs (`<[hpc].driver_job>`,
+  `pbsJobs/jax_gpu_compvalues.sh`). What IS here (since 2026-10-09) is the
+  **metrics** half of the comparison, `compare_metrics.py` (Part 3): the
+  numbers are the same for every project once the two data sets exist; only
+  the acceptance rule applied to them is per project.
 - **Repair** — there is no repair *script*. Repair is always performed
   **in-context by the driving agent**, editing `out/jax/{proc}.py` directly in
   response to a validator's output. The fix log lives in `out/issues/fix_log.md`.
@@ -645,6 +649,78 @@ Cause: the bridge and the JAX signature have diverged. Lint's
 "bridge call matches JAX signature" check should have caught this — if it did
 not, the bridge is stale: re-run the bridge stage, or fix the JAX signature to
 match the packet-derived one.
+
+---
+
+# Part 3 — Comparison metrics (`compare_metrics.py`, since 2026-10-09)
+
+## What it is
+
+The project-independent half of the end-to-end comparison. Every project's
+comparison script used to load the two data sets and compute the same
+numbers by hand before applying its own criterion. The loading and the
+numbers are now shared; the criterion is not.
+
+| shared (this tool) | per project (`[comparison].script`) |
+|---|---|
+| reading the reference output and the JAX output (two declared layouts) | which rule accepts the translation, and its thresholds |
+| per variable: max abs error E_v and its location, MAE, RMSE, rRMSE, correlation, min/max, non-zero counts | (Kessler) E_v ≤ the measured envelope ε_v per variable |
+| exact: bitwise identity, ULP distance, match at the reference's own digits, file sha256 | (a single-precision, text-limited reference) onsets within N steps, peaks within a factor, non-negativity, activity |
+| identity self-test (reference vs itself = 0 everywhere) | the human-readable report + JSON with the top-level PASS/FAIL |
+
+It never prints PASS or FAIL. `docs/README.md` §Generic vs project-specific
+states the same split for the whole pipeline.
+
+## Data layout — `[comparison.data]`
+
+```toml
+[comparison.data]
+format    = "per_variable_files"      # <variable>.txt on each side (Kessler)
+reference = "data/exp2_jd/fortran_io/outputs"
+jax       = "out/driver"
+variables = ["theta", "qv", "qc", "qr", "precl", "relhum"]
+
+[comparison.data]
+format    = "block_file"              # one whitespace table per side, one column per variable
+reference = "_p3-reference/out_p3.dat"
+jax       = "out/driver/out_p3_jax.dat"
+reference_sig_digits = 4              # the reference writer's precision -> match-at-digits count
+# variables fall back to [comparison].columns; floors to [comparison.floor_columns]
+```
+
+Floors (`{name = value}`) mark "no signal": elements where both sides sit at
+or below the floor are excluded from the difference metrics (e.g. a
+reflectivity floor `dBZ = -99`). Correlation is always over the full column.
+
+## Reading the metrics honestly
+
+- **E_v is always computable** when the two data sets exist.
+  What changes between projects is what it means: Kessler's reference is
+  float64 written with 20 digits, so E_v is the computation's difference and
+  can be gated against the Fortran-vs-Fortran envelope; a reference that is
+  single precision written with 4 significant digits leaves E_v bounded
+  below by the text resolution (half a unit in the 4th digit of each value)
+  and says nothing finer than that. The `match_at_ref_digits` count is the
+  sharpest exact statement such data supports. The tool reports both and
+  decides neither.
+- **rRMSE** = RMSE / RMS(reference) and **rel** = E_v / max|reference| are
+  scale-free and comparable across variables and schemes; they are what a
+  universal minimum (next-steps item 2) would be written in.
+- **bitwise / ULP** is evidence, never a criterion: two correct
+  implementations differ in the last bits.
+
+## Output and verification
+
+`out/driver/compare_metrics.json` (`metrics` per variable + `summary` with
+the worst value of each number) and `compare_metrics.txt` (one table). The
+tool was checked on 2026-10-09 against the numbers the Kessler comparison
+script had recorded (6 variables — max abs error, MAE, RMSE, bit-identical
+counts, max/mean ULP): identical to the last digit.
+
+```bash
+python validation/compare_metrics.py             # from the project root; writes next to the JAX data
+python validation/compare_metrics.py --out-dir /tmp/x
+```
 
 ---
 

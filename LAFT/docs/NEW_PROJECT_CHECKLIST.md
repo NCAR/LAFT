@@ -21,7 +21,7 @@ laft-xyz/
 ├── validation/           # phase05_01/02 (shared validators) + VALIDATION_MANUAL.md
 ├── workflow_profiler/    # optional stage 3 + PROFILE_WORKFLOW.md + PROFILER_MANUAL.md
 ├── pbsJobs/              # copy the live jobs; rename the driver pair (step 5)
-├── bridge_test/          # YOUR per-project pytest suite + TESTING_GUIDE.md (step 3b)
+├── bridge_test/          # OPTIONAL per-project additions (step 3b); the bridge suite itself is shared
 └── out/                  # created by the pipeline
 ```
 
@@ -51,9 +51,19 @@ TODO. The tools auto-discover it when run from the project root (or pass
 both"); pin to the winner only after the project's dual-contract benchmark,
 by hand, with a provenance comment (see §6).
 
-## 3. Supply the four hand-made inputs
+## 3. Supply the hand-made inputs
 
-The config makes the pipeline pluggable; these four things it cannot generate:
+The config makes the pipeline pluggable. What the framework cannot generate is
+the **ground truth and the knowledge of the physics** — everything else
+(packets, bridges, the whole bridge test suite, lint, audit, runtime smoke
+test, comparison metrics, profiler diagnostics) is framework code driven by
+metadata and config (`README.md` §Generic vs project-specific, validated end to
+end on the Kessler project, 2026-10-09, with zero per-project test code). The hand-made
+set is: the four inputs below (always), the physics test in `bridge_test/`
+(§3b — the only test a project writes, because sanity ranges and plausible
+inputs are physics, not packet data), and, for Stage 3 only, the profiler inputs script
+(`[profiler].inputs_script`: how to capture one real bridge call from the
+project's driver — see `workflow_profiler/PROFILE_WORKFLOW.md` §Inputs). These four things it cannot generate:
 
 1. **Fortran source** in `data/src/` — one file or several:
    `[source].fortran_files` accepts a list and phase01 writes one merged
@@ -80,22 +90,29 @@ The config makes the pipeline pluggable; these four things it cannot generate:
    enforced by `pbsJobs/jax_gpu_compvalues.sh`: run from the project root;
    exit 0 = PASS, non-zero = FAIL (PBS log authoritative); write a
    human-readable report + a JSON with a top-level PASS/FAIL status next to
-   the JAX driver output.
+   the JAX driver output. The **metrics** are not yours to write: declare the
+   two data sets in `[comparison.data]` (layout `per_variable_files` or
+   `block_file`) and `validation/compare_metrics.py` computes max abs error,
+   MAE, RMSE, rRMSE, corr, bitwise/ULP and more before your script runs
+   (`VALIDATION_MANUAL.md` Part 3); your script applies the criterion.
 
-### 3b. The per-project bridge test suite (mandatory, Stage 1 gate)
+### 3b. Bridge tests — shared; per-project additions optional
 
-`bridge_test/` is hand-written per project and gates translation: layout
-tests for every generated bridge (parameterise over all procedures when
-there are many), translation-dependent tests, the **contract-2 equivalence
-test** per array-bearing procedure (template
-`kessler/bridge_test/test_kessler_device_entry.py`), the
-self-selecting **vertical-symmetry test** (copy
-`LAFT/workflow_bridge/test_direction_symmetry.py` unchanged into suites that
-provide the `test_all_bridges_layout.py` helpers it imports — n/a is a pass,
-not a skip; the kessler suite predates it and does not carry it), and a `TESTING_GUIDE.md` describing how to run it. The full 7-item checklist is
-in `workflow_bridge/BRIDGE_WORKFLOW.md` §New-project checklist; the gate
-must report PASS with zero skips (`workflow_bridge/run_bridge_tests.py
---require-dependent`) before Stage 2 starts.
+Since 2026-10-09 the Stage-1 gate needs **no per-project test file**: the
+shared suite in `workflow_bridge/` (`test_generated_bridge_layout.py`,
+`test_generated_bridge_device_entry.py`, `test_direction_symmetry.py`)
+derives each procedure's contract from the packets and
+`run_bridge_tests.py` runs it from any project root (`BRIDGE_WORKFLOW.md`
+§Step 2). Add files to `bridge_test/` only for what the packets cannot know:
+a `bridge_inputs.py` hook when a kernel is not defined on synthetic data
+(the hook convention is documented in
+`workflow_bridge/test_generated_bridge_device_entry.py`), a physics/functionality
+test, a chain test where procedures share device-resident intermediates, a
+closed-form check, a hand-transcribed pin — the 7-item list in
+`BRIDGE_WORKFLOW.md` §New project checklist. The gate must report PASS with
+zero skips among the layout tests before Stage 2 starts; with
+`--require-dependent` (Stage 2, Step 4.5) every translation-dependent test
+must also run and pass.
 
 ## 4. Optional project-specific knowledge
 

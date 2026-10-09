@@ -14,11 +14,25 @@
 # and the init routine partial, while several *compact* procs were complete):
 #
 #   FAIL (high confidence — block the procedure):
-#     - scaffold-phrase scan: precise phrases a model emits when it punts
-#       (e.g. "for the sake of this draft", "would go here", "remaining physics").
 #     - dead calls: a procedure in this proc's `calls` list that appears ONLY
 #       commented-out in the translation (model punted on a dependency, e.g.
 #       a commented `# qvs = qv_sat(...)`).
+#     - silent stub: a sizeable procedure that is both tiny and has lost most
+#       of its call graph (2026-08-25).
+#     - a scaffold phrase CONFIRMED by the Fortran comparison (below).
+#
+#   TRIGGER (2026-10-09) — the scaffold-phrase scan: precise phrases a
+#     model emits when it punts ("for the sake of this draft", "would go here",
+#     "remaining physics", "placeholder for", …), scanned only in standalone
+#     comments and strings (an end-of-line comment on a code line never
+#     matches). A hit is NOT a verdict: the check runs the semantic audit's
+#     Fortran comparison for that procedure (fortran_comparison) and
+#     scaffold_confirmed() decides — FAIL if an audit FAIL, >= SCAFFOLD_CONFIRM_CONSTS
+#     Fortran constants absent, >= SCAFFOLD_CONFIRM_BLOCKS labelled blocks
+#     unmentioned, or ratio < SCAFFOLD_CONFIRM_RATIO; otherwise WARN with the
+#     matched phrase and the clean comparison in the report. A real scaffold
+#     leaves all those footprints at once; a complete translation with an
+#     unlucky comment leaves none (the Kessler 2026-10-09 false positive).
 #
 #   WARN (advisory — trigger a look, never an auto-fail):
 #     - extreme-low size ratio with NO honest scaffold marker: could be silent
@@ -31,8 +45,9 @@
 #
 # Writes out/reports/translation/completeness_check.json and prints a table.
 #
-# STOP RULE (TRANSLATE_WORKFLOW.md Step 2.5, 2026-08-25): any FAIL is a hard
-# stop — workflow_state.json → status "aborted_scaffold" with the evidence,
+# STOP RULE (TRANSLATE_WORKFLOW.md Step 2.5, 2026-08-25; phrase-trigger rule
+# 2026-10-09): any FAIL is a hard stop — workflow_state.json → status
+# "aborted_scaffold" with the evidence,
 # exit code 2, and every downstream gate (audit_gate.py → runtime PBS) stays
 # closed. No automatic re-translation: a scaffold is an output-horizon /
 # capability signal, re-running the same prompt reproduces it; a human decides.
@@ -90,8 +105,37 @@ def code_lines(text: str) -> int:
     return n
 
 
+def _scaffold_candidate_text(text: str) -> str:
+    """The parts of a translation where a scaffold can live: standalone comment
+    lines (a comment that IS the line) and string literals/docstrings. An
+    end-of-line comment that trails an executable statement is excluded — a
+    scaffold replaces code, it does not annotate it. 2026-10-09: the Claude
+    Kessler run was stopped by `one = jnp.asarray(1.0, ...)  # safe placeholder
+    for masked denominators`, a correct numerical comment on a real statement.
+    Falls back to the whole file when it cannot be tokenised (syntax error)."""
+    import io
+    import tokenize
+    parts: list[str] = []
+    try:
+        line_has_code: dict[int, bool] = {}
+        toks = list(tokenize.generate_tokens(io.StringIO(text).readline))
+        for tok in toks:
+            if tok.type in (tokenize.COMMENT, tokenize.NL, tokenize.NEWLINE, tokenize.INDENT,
+                            tokenize.DEDENT, tokenize.ENCODING, tokenize.ENDMARKER):
+                continue
+            if tok.type == tokenize.STRING:
+                parts.append(tok.string)      # docstrings and string literals always count
+            line_has_code[tok.start[0]] = True
+        for tok in toks:
+            if tok.type == tokenize.COMMENT and not line_has_code.get(tok.start[0], False):
+                parts.append(tok.string)      # standalone comment line
+    except (tokenize.TokenError, SyntaxError, IndentationError):
+        return text
+    return "\n".join(parts)
+
+
 def scan_scaffold(text: str) -> list[str]:
-    low = text.lower()
+    low = _scaffold_candidate_text(text).lower()
     return [p for p in SCAFFOLD_PHRASES if p in low]
 
 
@@ -174,6 +218,90 @@ def fortran_has_arrays(src: str) -> bool:
     return any(rx.search(src) for rx in ARRAY_DECL)
 
 
+# ---------------------------------------------------------------------------
+# Scaffold phrase = TRIGGER, not verdict (2026-10-09)
+# ---------------------------------------------------------------------------
+# A phrase hit alone used to be a hard stop. It is a one-shot-model symptom
+# (output horizon), and it can also be ordinary wording in a complete
+# translation (Kessler 2026-10-09: "safe placeholder for masked denominators").
+# So a hit now runs the Fortran comparison for THAT procedure — the same
+# deterministic checks the semantic audit (Step 3.5a) runs — and the verdict
+# comes from what the comparison finds. A real scaffold leaves large footprints
+# in all of them at once: callees never invoked, Fortran constants missing,
+# labelled blocks missing, a tiny size ratio. A complete translation with an
+# unlucky comment leaves none. Dead (commented-out) calls and the silent-stub
+# rule are unchanged: they are evidence on their own, whoever wrote the code.
+SCAFFOLD_CONFIRM_RATIO = 0.25       # JAX code lines / Fortran lines below this = stub-sized
+SCAFFOLD_CONFIRM_CONSTS = 5         # >= this many Fortran literals absent
+SCAFFOLD_CONFIRM_BLOCKS = 2         # >= this many labelled blocks unmentioned
+
+
+def fortran_comparison(proc: str) -> dict | None:
+    """Run the semantic audit's deterministic Fortran-vs-translation checks for
+    one procedure (waivers applied) and summarise what a scaffold would show.
+    Returns None when the Fortran unit cannot be found."""
+    import importlib
+    import sys as _sys
+    here = str(Path(__file__).resolve().parent)
+    if here not in _sys.path:
+        _sys.path.insert(0, here)
+    sa = importlib.import_module("phase05_01b_semantic_audit")
+    f90 = sa.find_f90(proc)
+    if f90 is None:
+        return None
+    p_raw = (sa.JAX_DIR / f"{proc}.py").read_text(encoding="utf-8", errors="replace")
+    f_txt = sa.strip_fortran(f90.read_text(encoding="utf-8", errors="replace"))
+    p_txt = sa.strip_python(p_raw)
+    findings = (sa.check_zero_forever(f_txt, p_txt) + sa.check_intent_out(f_txt, p_txt)
+                + sa.check_constants(f_txt, p_txt) + sa.check_calls_invoked(proc, f_txt, p_txt)
+                + sa.check_labelled_blocks(f_txt, p_raw))
+    if getattr(sa, "PROGNOSTIC_VARS", None):
+        findings += sa.check_update_terms(f_txt, p_txt)
+    if getattr(sa, "TABLE_READERS", None):
+        findings += sa.check_table_reads(proc, f_txt)
+    waivers = {}
+    if sa.WAIVERS.exists():
+        try:
+            waivers = json.loads(sa.WAIVERS.read_text(encoding="utf-8")).get(proc, {})
+        except ValueError:
+            waivers = {}
+    for f in findings:
+        if f["name"] in set(map(str, waivers.get(f["check"], []))):
+            f["severity"] = "WAIVED"
+    fails = [f for f in findings if f["severity"] == "FAIL"]
+    warns = [f for f in findings if f["severity"] == "WARN"]
+    n_consts = sum(len(f.get("values", [])) for f in findings
+                   if f["check"] == "missing-consts" and f["severity"] == "WARN")
+    n_blocks = sum(1 for f in findings if f["check"] == "labelled-blocks" and f["severity"] == "WARN")
+    return {
+        "fortran_unit": str(f90),
+        "fail": [f"{f['check']}:{f['name']}" for f in fails],
+        "warn": [f"{f['check']}:{f['name']}" for f in warns],
+        "missing_constants": n_consts,
+        "missing_labelled_blocks": n_blocks,
+    }
+
+
+def scaffold_confirmed(cmp_: dict | None, ratio: float | None) -> tuple[bool, str]:
+    """Decide whether a phrase hit is a real scaffold. (confirmed, reason)."""
+    if cmp_ is None:
+        return True, "no Fortran unit to compare against — phrase hit stands"
+    reasons = []
+    if cmp_["fail"]:
+        reasons.append(f"audit FAIL {cmp_['fail'][:3]}")
+    if cmp_["missing_constants"] >= SCAFFOLD_CONFIRM_CONSTS:
+        reasons.append(f"{cmp_['missing_constants']} Fortran constants absent")
+    if cmp_["missing_labelled_blocks"] >= SCAFFOLD_CONFIRM_BLOCKS:
+        reasons.append(f"{cmp_['missing_labelled_blocks']} labelled blocks unmentioned")
+    if ratio is not None and ratio < SCAFFOLD_CONFIRM_RATIO:
+        reasons.append(f"ratio {ratio} < {SCAFFOLD_CONFIRM_RATIO}")
+    if reasons:
+        return True, "; ".join(reasons)
+    return False, (f"Fortran comparison clean (0 FAIL, {len(cmp_['warn'])} WARN, "
+                   f"{cmp_['missing_constants']} constants absent, "
+                   f"{cmp_['missing_labelled_blocks']} blocks unmentioned, ratio {ratio})")
+
+
 def main(only_proc: str | None = None, no_abort: bool = False) -> int:
     cfg = get_config()
     jax_dir = cfg.jax_dir
@@ -223,9 +351,16 @@ def main(only_proc: str | None = None, no_abort: bool = False) -> int:
         silent_stub = (ratio is not None and f_lines >= RATIO_WARN_MIN_FLINES
                        and ratio < RATIO_WARN_BELOW and len(calls) >= 3
                        and len(absent) >= max(3, (len(calls) + 1) // 2))
-        if scaffold or dead or silent_stub:
+        # A scaffold phrase is a trigger: confirm or clear it against the Fortran.
+        comparison, phrase_cleared, phrase_reason = None, False, ""
+        if scaffold:
+            comparison = fortran_comparison(name)
+            confirmed, phrase_reason = scaffold_confirmed(comparison, ratio)
+            phrase_cleared = not confirmed
+
+        if (scaffold and not phrase_cleared) or dead or silent_stub:
             verdict = "FAIL"
-        elif scalar_mis or low_ratio or absent:
+        elif scaffold or scalar_mis or low_ratio or absent:
             verdict = "WARN"
         else:
             verdict = "PASS"
@@ -236,6 +371,9 @@ def main(only_proc: str | None = None, no_abort: bool = False) -> int:
             "scaffold_phrases": scaffold, "dead_calls": dead, "absent_calls": absent,
             "silent_stub": silent_stub,
             "scalar_misclassified": scalar_mis, "low_ratio_advisory": low_ratio,
+            "scaffold_phrase_cleared": phrase_cleared,
+            "scaffold_comparison": phrase_reason,
+            "fortran_comparison": comparison,
             "verdict": verdict,
         })
 
@@ -268,7 +406,10 @@ def main(only_proc: str | None = None, no_abort: bool = False) -> int:
         if r["verdict"] == "PASS":
             continue
         why = []
-        if r.get("scaffold_phrases"): why.append(f"scaffold:{r['scaffold_phrases'][:2]}")
+        if r.get("scaffold_phrases"):
+            why.append(f"scaffold phrase {r['scaffold_phrases'][:2]} "
+                       + ("CLEARED by Fortran comparison" if r.get("scaffold_phrase_cleared")
+                          else "CONFIRMED") + f" ({r.get('scaffold_comparison', '')})")
         if r.get("dead_calls"): why.append(f"dead_calls:{r['dead_calls']}")
         if r.get("silent_stub"): why.append(f"SILENT STUB: ratio {r['ratio']} with {len(r['absent_calls'])} callees absent")
         if r.get("absent_calls"): why.append(f"absent_calls:{r['absent_calls']} (inlined or dropped?)")
@@ -290,13 +431,20 @@ def main(only_proc: str | None = None, no_abort: bool = False) -> int:
           f"| run | {summary['timestamp']} |",
           f"| scope | {'procedure ' + only_proc if only_proc else 'all procedures'} |",
           f"| verdict | **{summary['status']}** — PASS {n_pass}, WARN {n_warn}, FAIL {n_fail}, MISSING {n_miss} |",
-          "| rule | FAIL (scaffold phrase / commented-out callee) = translation STOPPED, "
-          "`status aborted_scaffold`, no automatic retry — human decision |",
+          "| rule | FAIL = translation STOPPED (`status aborted_scaffold`, no automatic retry — human "
+          "decision). A scaffold PHRASE is a trigger: it stops only if the Fortran comparison for that "
+          "procedure confirms a stub (audit FAIL, ≥"
+          f"{SCAFFOLD_CONFIRM_CONSTS} constants absent, ≥{SCAFFOLD_CONFIRM_BLOCKS} labelled blocks "
+          f"unmentioned, or ratio < {SCAFFOLD_CONFIRM_RATIO}); a clean comparison clears it to WARN. "
+          "Commented-out callees and silent stubs stop on their own. |",
           "", "| procedure | Fortran lines | JAX code lines | ratio | verdict | why |",
           "|---|---|---|---|---|---|"]
     for r in results:
         why = []
-        if r.get("scaffold_phrases"): why.append(f"scaffold phrases {r['scaffold_phrases']}")
+        if r.get("scaffold_phrases"):
+            why.append(f"scaffold phrases {r['scaffold_phrases']} — "
+                       + ("cleared by the Fortran comparison" if r.get("scaffold_phrase_cleared")
+                          else "CONFIRMED by the Fortran comparison") + f": {r.get('scaffold_comparison', '')}")
         if r.get("dead_calls"): why.append(f"commented-out calls {r['dead_calls']}")
         if r.get("absent_calls"): why.append(f"absent calls {r['absent_calls']} (inlined or dropped?)")
         if r.get("scalar_misclassified"): why.append("scalar-only flag but Fortran declares arrays")
@@ -316,7 +464,7 @@ def main(only_proc: str | None = None, no_abort: bool = False) -> int:
         print("  SCAFFOLD DETECTED — TRANSLATION STOPPED (status: aborted_scaffold)")
         for r in failed:
             ev = []
-            if r.get("scaffold_phrases"): ev.append(f"phrases {r['scaffold_phrases']}")
+            if r.get("scaffold_phrases"): ev.append(f"phrases {r['scaffold_phrases']} confirmed by the Fortran comparison: {r.get('scaffold_comparison', '')}")
             if r.get("dead_calls"): ev.append(f"commented-out calls {r['dead_calls']}")
             if r.get("silent_stub"): ev.append(f"silent stub: {len(r['absent_calls'])} callees absent at ratio {r['ratio']}")
             print(f"    {r['proc']}: {'; '.join(ev)}  "
@@ -334,8 +482,10 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(
         description="Flag scaffolded/stubbed translations (TRANSLATE_WORKFLOW Step 2.5). "
-                    "Any FAIL stops the translation: workflow_state.json → aborted_scaffold, "
-                    "exit 2, human decision required.")
+                    "A scaffold phrase is a trigger: it is confirmed or cleared by the Fortran "
+                    "comparison for that procedure. Any FAIL (confirmed phrase, commented-out "
+                    "callee, silent stub) stops the translation: workflow_state.json → "
+                    "aborted_scaffold, exit 2, human decision required.")
     add_config_arg(ap)
     ap.add_argument("--proc", help="check ONE procedure (per-procedure Step 2.5 run, "
                                    "right after its final pass lands)")

@@ -111,65 +111,81 @@ qsub -v TEST_SCRIPT=workflow_bridge/run_bridge_tests.py pbsJobs/jax_cpu_test.sh
 The suite executes JAX, so it is submitted as a CPU PBS job
 (`pbsJobs/jax_cpu_test.sh` runs `python workflow_bridge/run_bridge_tests.py`
 on a compute node; read the log in `out/jobs/`). The runner executes the
-project's whole `bridge_test/` suite and writes the durable gate
-artifacts under `out/reports/bridge/`:
+**shared suite** plus whatever the project adds in its own `bridge_test/`
+(optional, see below), and writes the durable gate artifacts under
+`out/reports/bridge/`:
 
 - `bridge_test_results.json` — machine-readable, **top-level `status:
-  PASS/FAIL`** (same convention as the driver/comparison JSONs). Later
-  workflows check this instead of re-running the suite.
-- `bridge_report.md` — human-readable: generated bridges, analysis-report
-  summary, per-test outcomes, verdict.
+  PASS/FAIL`** (same convention as the driver/comparison JSONs), with the
+  list of files that ran under `suite`. Later workflows check this instead
+  of re-running the suite.
+- `bridge_report.md` — human-readable: generated bridges, suite, analysis-
+  report summary, per-test outcomes, verdict.
 
-The runner exits 0 on PASS, 1 on FAIL. Gate rule: every
-`bridge_test/test_*_layout.py` test passes with zero skips among them, and
-nothing anywhere fails. The translation-dependent suite runs too but is
-informational only — `skipped` is its normal state before a translation
+The runner exits 0 on PASS, 1 on FAIL. Gate rule: every layout test (any
+file whose name contains `_layout`) passes with zero skips among them, and
+nothing anywhere fails. The translation-dependent tests run too but are
+informational only — `skipped` is their normal state before a translation
 exists.
 
-To iterate on a single file without regenerating the report (from an
+### The shared suite (since 2026-10-09) — nothing written per project
+
+Three files in `LAFT/workflow_bridge/`, reached through the project's
+`workflow_bridge/` symlink, run from the project root. None is copied or
+edited per project: each derives the procedure's contract from the
+project's packets through the generator's own extraction
+(`BridgeGenerator.extract_parameters()` / `extract_module_info()` over
+`out/phase1_index.json` + `out/packets/`, plus `[bridge.optional_kwargs]`
+and the per-step-scalar rule from `config/project.toml`), so a new
+procedure, a renamed argument or a changed module-var list needs no test
+edit.
+
+| File | Needs translation? | Checks, per generated bridge |
+|---|---|---|
+| `test_generated_bridge_layout.py` | **No** — plants a pass-through fake kernel | array-bearing: transfer helpers (`to_device` no host permute, bit-exact roundtrip, C-order); both entries + alias, contract-2 signature = contract 1 minus CHARACTER; `static_argnames` = integer/logical scalars minus per-step counters; every return slot bit-identical under the identity core; outputs NumPy / original shape / float64 / C-contiguous, scalar outputs plain Python values; rank ≥ 2 inputs reach the core with all axes reversed; statics concrete, real scalars / per-step counters / module vars traced; CHARACTER args never enter the jitted region and pass through; optional kwargs forwarded (`None` when omitted). Scalar-only: no device entry, no transfers; wrapper receives every argument unchanged, returns passed straight back. Plus coverage: every `out/bridge/*_bridge.py` ↔ a packet. |
+| `test_generated_bridge_device_entry.py` | **Yes** — executes the real kernel | translation present; public device entry + alias; contract 2 on `to_device(host inputs)` returns, after `device_get`, values bit-identical (NaN-equal) to contract 1, same arity/shape/dtype, array outputs left on the device. Skips with reason while `out/jax/` holds no array-bearing translation. |
+| `test_direction_symmetry.py` | **Yes** — executes the host bridge twice | self-selecting from the Fortran (identifier-stride level loop whose bounds and direction are arguments): flipped column + reversed direction must give flipped-identical outputs; records n/a as a PASS in `out/reports/bridge/direction_symmetry.json` when no procedure qualifies (never a skip). |
+
+Inputs for the translation-dependent files are synthetic and packet-derived
+(integer size arguments bound to the array extents, index arguments inside
+every array, small positive real values). A kernel that is not defined on
+synthetic data — lookup-table paths, iteration counts that depend on
+physical magnitudes, index arguments that must be consistent with each
+other — gets physically plausible inputs from the **optional per-project
+hook** `bridge_test/bridge_inputs.py :: inputs(proc) -> dict | None`
+(Kessler needs none).
+
+Why the shared files are at least as strong as the hand-written per-project
+files they replaced, and where their limit is (they prove the generator
+wrote what its own inputs say; a wrong packet is the frontend stage's and
+the semantic audit's job): `docs/LAYOUT_TEST_MUTATION_CHECK_2026-10-09.md`
+(14/14 injected defects caught vs 11/14 by the hand-written Kessler file).
+
+### Per-project additions (`bridge_test/`, optional)
+
+Only for what the packets cannot know. Each file self-skips with a reason
+while the translation it needs is absent:
+
+- **physics / functionality** — bridge vs direct-kernel call on physically
+  plausible inputs, sanity ranges, error-path propagation (template:
+  `kessler/bridge_test/test_kessler_run_bridge.py`);
+- **a chain test** where procedures hand device-resident intermediates to
+  each other across the scheme's per-step phase sequence;
+- **a closed-form `test_formula`** where a kernel has one;
+- **a hand-transcribed pin** of a key procedure's contract, which fails when
+  the packets drift even though the shared suite — which trusts the
+  packets — still passes (a per-procedure file that transcribes the
+  signature, as `kessler/bridge_test/test_kessler_run_bridge_layout.py` does);
+- **the `bridge_inputs.py` hook** described above.
+
+A project with none of these has no `bridge_test/` folder at all.
+
+To iterate on one file without regenerating the report (from an
 interactive compute-node session, since it executes JAX):
 
 ```bash
-python -m pytest bridge_test/test_<proc>_bridge_layout.py -v
+python -m pytest workflow_bridge/test_generated_bridge_layout.py -v
 ```
-
-Bridge tests are **per-project code** (they hardcode each procedure's
-signature and slot order), so they live in the project's own `bridge_test/`
-folder, not here — the same shared/per-project split as
-`[driver].script` and `[profiler].inputs_script`. Reference implementation:
-`kessler/bridge_test/test_kessler_run_bridge_layout.py`.
-
-A layout test file must:
-
-1. **Inject a fake pass-through core** into `sys.modules` under the
-   translated module's name (e.g. `out.jax.<proc>`) *before* importing the
-   bridge — the array-bearing bridge imports `<proc>_core` at module level
-   (scalar-only bridges import the wrapper `<proc>`), and this makes the
-   test runnable with `out/jax/` empty. The fake core must be a **pure
-   jit-traceable function** (no recording into Python state of concrete
-   values — it runs under `jax.jit`, so its arguments are tracers; assert on
-   tracer *shapes/dtypes* inside, or validate wiring via the roundtrip
-   identity). Pop any cached real modules first, and restore `sys.modules`
-   in `teardown_module` so this file and the translation-dependent file are
-   order-independent.
-2. Cover, with **every field carrying unique values** (so a swapped argument
-   cannot cancel out):
-   - **Transfer helpers**: `to_device`/`to_host` roundtrip preserves values,
-     shape, and dtype (float64); no permutation happens host-side.
-   - **Roundtrip identity**: `bridge(**inputs)` returns each array
-     bit-identical to its input (`assert_array_equal`, not almost-equal —
-     the axis reversal is exact in float64).
-   - **Output layout**: outputs are original-shape, standard C-order
-     `(ncol, nz)` NumPy arrays.
-   - **Kernel-side layout**: inside the fake core, each rank≥2 argument's
-     *shape* must be the reverse of the input shape (the in-jit reversal
-     happened); rank 0/1 shapes unchanged.
-   - **Scalars**: reach the core unconverted (shape/index integers arrive
-     as concrete Python values — they are jit statics).
-   - **Strings**: CHARACTER args must NOT reach the core; CHARACTER outputs
-     pass through the bridge unchanged in their return slots.
-   - **Module vars**: reach the core and come back in their return slots
-     (INOUT pattern).
 
 **Done criterion:** `out/reports/bridge/bridge_test_results.json` says
 `"status": "PASS"` → the bridge layer is verified and the translator
@@ -190,75 +206,47 @@ file** — do not hand-edit `out/bridge/*.py`:
 
 ## Out of scope here
 
-`bridge_test/test_<proc>_bridge.py` — the translation-**dependent** suite
-(bridge vs direct-JAX equivalence, physics sanity, error propagation through
-the real kernel, **and contract-2 equivalence: `<proc>_bridge_device` on
-`to_device(...)` inputs must return, after `jax.device_get`, arrays
-bit-identical to `<proc>_bridge` on the same host inputs** — one such test per
-array-bearing procedure is part of the dependent gate since 2026-08-19) —
-needs `out/jax/<proc>.py` filled in and runs in the
-**translator workflow's Step 4.5**
+The translation-**dependent** tests — the shared
+`test_generated_bridge_device_entry.py` (contract-2 equivalence: `<proc>_bridge_device`
+on `to_device(...)` inputs must return, after `jax.device_get`, arrays
+bit-identical to `<proc>_bridge` on the same host inputs, one check per
+array-bearing procedure), the shared `test_direction_symmetry.py`, and the
+project's own physics / chain files — need `out/jax/<proc>.py` filled in and
+run in the **translator workflow's Step 4.5**
 (`python workflow_bridge/run_bridge_tests.py --require-dependent`, after
-runtime validation, before the driver job). It skips itself with a clear
+runtime validation, before the driver job). They skip themselves with a clear
 reason when the translation (or bridge) is absent. Numerical agreement with
 the original Fortran is validated later still, by the driver comparison
 stage (`[comparison].script`).
 
 ## New project checklist
 
-Every project's `bridge_test/` is per-project code, but the required
-check-set is the same everywhere — suites differ by SCHEME SHAPE (how many
-procedures; whether procs chain through device-resident intermediates;
-whether a kernel has a closed form), never by drift. Items 2–5 create the
-test files, item 6 documents them, item 7 gates.
+The required check-set is the same everywhere and is **shared code** —
+no project writes a layout, contract-2 or symmetry test. What a project
+may add depends on its SCHEME SHAPE (whether procs chain through
+device-resident intermediates; whether a kernel has a closed form; whether
+synthetic inputs can drive it).
 
 1. Phases 01–02 green, then Step 1 (generation).
-2. **Layout suite** (translation-independent — the Step-2 gate). Pick the
-   shape by procedure count:
-   - **few procedures** → copy
-     `kessler/bridge_test/test_kessler_run_bridge_layout.py` per
-     procedure; adapt procedure name, field lists, ranks, slot indices,
-     module vars to the scheme's signature (read the generated
-     `out/bridge/<proc>_bridge.py` — the signature and return tuple are
-     the contract);
-   - **many procedures** (tens of them) → parameterise ONE file over all
-     generated bridges instead of hand-writing dozens.
+2. Run the gate (Step 2). It needs no per-project file: the shared layout
+   test parameterises itself over every generated bridge.
 3. If a wiring test asserts which scalars are jit-static, keep per-step
    counters (`it`, `kount`, `itimestep` — anything the driver loop changes
-   every call) in the TRACED-scalars check, never in the statics list: a
-   per-step static re-specializes and recompiles the kernel every step
-   (tens of seconds per step on a large orchestrator). phase03 excludes these automatically
-   (framework_config.is_per_step_scalar; extend via
-   `[heuristics].per_step_scalar_names`).
-4. **Translation-dependent functionality file** `test_<proc>_bridge.py` —
-   bridge-vs-direct-kernel equivalence, physics sanity, and error-path
-   propagation against the REAL kernel. It skips itself with a clear
-   reason while `out/jax/` is empty and becomes part of the gate at the
-   translator workflow's Step 4.5 (`--require-dependent`). Template:
-   `kessler/bridge_test/test_kessler_run_bridge.py`.
-5. **Contract-2 equivalence test** in the dependent suite (template:
-   `kessler/bridge_test/test_kessler_device_entry.py`,
-   parameterised over the array-bearing procedures — the right shape for
-   many-proc projects too). Add a **chain test** ONLY where procedures
-   share device-resident intermediates;
-   add a closed-form `test_formula` check ONLY where a kernel has one.
-   Also copy the **vertical-symmetry test** template
-   `LAFT/workflow_bridge/test_direction_symmetry.py` into `bridge_test/`
-   unchanged (2026-08-25) when the suite is the parameterised
-   many-procedure kind — the template imports the `CONTRACTS`,
-   `_make_inputs` and `_import_line` helpers of a
-   `test_all_bridges_layout.py`. It derives its own cases from the Fortran
-   (procedures with an identifier-stride level loop whose bounds and
-   direction are arguments), flips the column + reverses the direction and
-   requires identical physics; with no such procedure it records `n/a` in
-   `out/reports/bridge/direction_symmetry.json` and passes (never skips).
-   The kessler suite (per-procedure files, written before the template)
-   does not carry it; kessler would record `n/a` anyway — its level stride
-   `lyr_step` is a local, not an argument.
-6. **`bridge_test/TESTING_GUIDE.md` — REQUIRED for every project**
-   (decided 2026-08-20): documents the suite's files, what each test
-   asserts, and how to run them. Each project's file set differs (scheme
-   shape drives it), so the guide is what makes the suite navigable
-   without reading every test. Model:
-   `kessler/bridge_test/TESTING_GUIDE.md`.
+   every call) traced, never static: a per-step static re-specializes and
+   recompiles the kernel every step (tens of seconds per step on a large
+   orchestrator). phase03 excludes
+   these automatically (`framework_config.is_per_step_scalar`; extend via
+   `[heuristics].per_step_scalar_names`), and the shared layout test checks
+   the rule.
+4. **Only if a kernel is not defined on synthetic data**, write
+   `bridge_test/bridge_inputs.py` with `inputs(proc) -> dict | None`
+   (convention documented in `test_generated_bridge_device_entry.py`).
+5. **Only where it applies**, add per-project files to `bridge_test/`: a
+   physics / functionality test (template:
+   `kessler/bridge_test/test_kessler_run_bridge.py`), a chain test
+   where procedures share device-resident intermediates, a closed-form
+   `test_formula` where a kernel has one.
+6. If the project has per-project files, a short `bridge_test/TESTING_GUIDE.md`
+   naming them and what each asserts (the shared suite is documented here,
+   not per project).
 7. Run the gate; iterate per "If the test gate fails".

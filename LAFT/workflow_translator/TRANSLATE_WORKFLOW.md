@@ -228,7 +228,10 @@ python workflow_translator/phase04_04_completeness_check.py --proc {proc}     # 
 
 The second command is the per-procedure **completeness check (§2.5)**. If it
 prints `SCAFFOLD DETECTED` the translation is **stopped** — do not author the
-next procedure, do not re-run the pass; read §2.5.
+next procedure, do not re-run the pass; read §2.5. If it prints a WARN that a
+scaffold phrase was **cleared by the Fortran comparison**, continue: the
+phrase was wording in a complete translation, and the evidence is in the
+report.
 
 **Run this immediately after each procedure, not batched at the end.** The
 script stamps the wall-clock time of every completed step into
@@ -237,18 +240,26 @@ consecutive `generated out/jax/<proc>.py` stamps. Batching the calls collapses
 those gaps and destroys the per-procedure timing in Table 1 (§2e). The
 timestamp is recorded by the script, never reported by the agent.
 
-### 2.5 — Completeness check: scaffold = HARD STOP (no retry)
+### 2.5 — Completeness check: a confirmed scaffold = HARD STOP (no retry)
 
 ```bash
 python workflow_translator/phase04_04_completeness_check.py --proc {proc}   # after each procedure (§2d)
 python workflow_translator/phase04_04_completeness_check.py                 # whole set, once the loop ends
 ```
 
-Checks that each procedure was **translated, not summarised**: scaffold
-admission phrases ("would go here", "remaining physics", …) and callees that
-appear only commented-out are **FAIL**; callees absent altogether, an extreme
-JAX/Fortran size ratio, or a scalar-only misclassification are **WARN**
-(listed for you to judge). Results: `out/reports/translation/completeness_check.json`
+Checks that each procedure was **translated, not summarised**. Callees that
+appear only commented-out, and the silent-stub rule (a sizeable procedure that
+is both tiny and has lost most of its call graph), are **FAIL** on their own.
+A scaffold admission phrase ("would go here", "remaining physics", …) is a
+**trigger, not a verdict** (2026-10-09): on a hit the script runs the
+semantic audit's Fortran comparison for that procedure and decides from what
+it finds — **FAIL** if the comparison confirms a stub (an audit FAIL, ≥ 5
+Fortran constants absent, ≥ 2 labelled blocks unmentioned, or a JAX/Fortran
+ratio < 0.25), otherwise **WARN** with the matched line and the clean
+comparison recorded in the report. Phrases are scanned only in standalone
+comments and strings; an end-of-line comment on a code line never matches.
+Callees absent altogether, an extreme size ratio, or a scalar-only
+misclassification are **WARN** (listed for you to judge). Results: `out/reports/translation/completeness_check.json`
 + the durable `completeness_report.md` (per-procedure run: `_<proc>` suffix).
 
 **Any FAIL stops the translation.** The script writes `status =
@@ -355,7 +366,7 @@ are checked against the Fortran read statement; **direction-masks (WARN,
 self-selecting)** — for Fortran loops with an identifier stride (`do k = A, B,
 -kdir`) the translation's `(x - y) * kdir >= 0` masks must have the orientation
 the stride implies (the exact test is the vertical-symmetry bridge test,
-`workflow_bridge/test_direction_symmetry.py`, in projects whose `bridge_test/` carries it, at Step 4.5). Projects
+`workflow_bridge/test_direction_symmetry.py`, at Step 4.5). Projects
 that enable them in `[semantic_audit].enabled_checks` (config/project.toml)
 additionally get lookup-table column-index checking (invented columns are FAIL
 and gate the run; Fortran-only columns are WARN — possibly unported optional
@@ -442,11 +453,13 @@ The suite executes JAX, so it goes through PBS like every other JAX step
 `python workflow_bridge/run_bridge_tests.py --require-dependent` on a CPU
 compute node (develop queue, a few minutes including the queue wait; no new
 workflow status). When the job leaves the queue read its log in `out/jobs/`.
-It executes the project's whole `bridge_test/` folder — including
-the translation-DEPENDENT tests (bridge vs direct-kernel call, error
-propagation, module-var INOUT values), which are skipped during the bridge
-workflow and only become active now that `out/jax/` holds a real
-translation. `--require-dependent` makes those tests part of the gate:
+It executes the shared suite (`workflow_bridge/test_generated_bridge_layout.py`,
+`test_generated_bridge_device_entry.py`, `test_direction_symmetry.py`) plus
+the project's own `bridge_test/` files, if any — including the
+translation-DEPENDENT tests (contract-2 ≡ contract-1 bit-identity per
+array-bearing procedure, vertical symmetry, and the project's physics /
+chain checks), which are skipped during the bridge workflow and only become
+active now that `out/jax/` holds a real translation. `--require-dependent` makes those tests part of the gate:
 skipped or absent dependent tests FAIL it.
 
 Pass criterion: exit code 0 — equivalently
@@ -540,7 +553,9 @@ python workflow_translator/translate_workflow_state.py \
   --complete-step "driver passed"
 ```
 
-The comparison report at `out/driver/compare_results_fortran_jax.txt` is
+The job first writes the shared metrics (`out/driver/compare_metrics.{json,txt}`,
+`validation/compare_metrics.py` — no pass/fail), then runs the project's
+script. The comparison report at `out/driver/compare_results_fortran_jax.txt` is
 authoritative.  Pass criterion: `ALL PASS` — the check set and tolerances are
 defined by `[comparison]` in `config/project.toml` (physics-level criteria; a
 single-precision Fortran reference vs a float64 translation does not agree to

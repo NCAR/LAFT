@@ -6,9 +6,16 @@ writes the durable gate artifacts:
     out/reports/bridge/bridge_test_results.json   (top-level PASS/FAIL status)
     out/reports/bridge/bridge_report.md           (generation + analysis + gate)
 
-Gate rule (translation-independent): every layout/wiring test
-(bridge_test/test_*_layout.py) must run and pass — no skips among them. The
-translation-DEPENDENT suite is executed in the same pytest run but only
+What runs (since 2026-10-09): the SHARED suite in LAFT/workflow_bridge/
+(test_generated_bridge_layout.py, test_generated_bridge_device_entry.py,
+test_direction_symmetry.py — contract derived from the project's packets,
+nothing written per project) plus whatever the project adds in its own
+bridge_test/ (optional: physics sanity, a device-resident chain, a
+hand-transcribed pin, the bridge_inputs.py hook).
+
+Gate rule (translation-independent): every layout/wiring test (any file whose
+name contains `_layout`) must run and pass — no skips among them. The
+translation-DEPENDENT tests are executed in the same pytest run but only
 reported: skipped while no translation exists (normal during the bridge
 workflow), pass/fail once the translator workflow has produced out/jax/.
 
@@ -43,9 +50,44 @@ sys.path.insert(0, str(SCRIPT_DIR.parent / "config"))
 from framework_config import get_config, init as init_config, add_config_arg  # noqa: E402
 
 
-def run_pytest(project_root: Path, junit_xml: Path) -> int:
-    """Run the whole bridge_test/ suite; dependent files self-skip as needed."""
-    cmd = [sys.executable, "-m", "pytest", "bridge_test/", "-v",
+# The SHARED suite (since 2026-10-09): one file each for the layout gate, the
+# contract-2 equivalence and the vertical-symmetry check. They derive each
+# procedure's contract from the project's packets through the generator's own
+# extraction, so no project writes or copies them. A project adds files to
+# its own bridge_test/ only for what the packets cannot know (physics sanity
+# ranges, a device-resident chain, a hand-transcribed pin, the
+# bridge_inputs.py hook) — that folder is optional.
+SHARED_TESTS = (
+    "test_generated_bridge_layout.py",         # translation-independent (the Stage-1 gate)
+    "test_generated_bridge_device_entry.py",   # translation-dependent
+    "test_direction_symmetry.py",              # translation-dependent, self-selecting
+)
+
+
+def suite_targets(project_root: Path) -> tuple[list[str], list[str]]:
+    """(shared test paths, per-project test paths) as pytest targets relative
+    to the project root. The shared files are addressed through the project's
+    workflow_bridge/ symlink when it exists (keeps junit classnames short),
+    else through this script's own directory."""
+    wb = project_root / "workflow_bridge"
+    shared_dir = wb if wb.is_dir() else SCRIPT_DIR
+    shared = []
+    for name in SHARED_TESTS:
+        p = shared_dir / name
+        if p.exists():
+            shared.append(str(p.relative_to(project_root)) if p.is_relative_to(project_root) else str(p))
+    per_project = []
+    test_dir = project_root / "bridge_test"
+    if test_dir.is_dir():
+        per_project = sorted(str(p.relative_to(project_root))
+                             for p in test_dir.glob("test_*.py"))
+    return shared, per_project
+
+
+def run_pytest(project_root: Path, junit_xml: Path, targets: list[str]) -> int:
+    """Run the shared suite + the project's own bridge_test/ files (if any);
+    dependent files self-skip as needed."""
+    cmd = [sys.executable, "-m", "pytest", *targets, "-v", "-p", "no:cacheprovider",
            f"--junitxml={junit_xml}"]
     print(f"▶ {' '.join(cmd)}")
     proc = subprocess.run(cmd, cwd=str(project_root))
@@ -104,14 +146,17 @@ def main() -> int:
     reports_dir = cfg.bridge_reports_dir
     reports_dir.mkdir(parents=True, exist_ok=True)
 
-    test_dir = project_root / "bridge_test"
-    if not test_dir.is_dir():
-        print(f"❌ {test_dir} not found — this project has no bridge tests yet "
-              "(see BRIDGE_WORKFLOW.md, 'New project checklist').")
+    shared, per_project = suite_targets(project_root)
+    if not shared:
+        print("❌ shared bridge tests not found next to this script "
+              f"({SCRIPT_DIR}) — the LAFT checkout is incomplete.")
         return 1
+    print(f"Shared suite ({len(shared)} files): " + ", ".join(shared))
+    print(f"Per-project additions ({len(per_project)} files): "
+          + (", ".join(per_project) if per_project else "none"))
 
     junit_xml = reports_dir / "bridge_test_results.xml"
-    exit_code = run_pytest(project_root, junit_xml)
+    exit_code = run_pytest(project_root, junit_xml, shared + per_project)
     if not junit_xml.exists():
         print("❌ pytest produced no junit XML — collection crashed; see output above.")
         return 1
@@ -155,6 +200,7 @@ def main() -> int:
         "require_dependent": args.require_dependent,
         "gate_rule": gate_rule,
         "bridges": bridges,
+        "suite": {"shared": shared, "per_project": per_project},
         "layout_tests": {"total": len(layout),
                          "passed": count(layout, "passed"),
                          "skipped": count(layout, "skipped")},
@@ -180,6 +226,11 @@ def main() -> int:
         "",
     ]
     md += [f"- `out/bridge/{b}`" for b in bridges] or ["- (none found)"]
+    md += ["", "## Suite", "",
+           "Shared (LAFT/workflow_bridge/, contract derived from the packets):", ""]
+    md += [f"- `{s}`" for s in shared]
+    md += ["", "Per-project additions (bridge_test/):", ""]
+    md += [f"- `{p}`" for p in per_project] or ["- (none)"]
     md += ["", "## Phase 03 analysis reports", ""]
     if analysis:
         for a in analysis:

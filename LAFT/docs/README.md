@@ -61,7 +61,8 @@ Key properties:
   `[driver].contracts`; see `NEW_PROJECT_CHECKLIST.md` §6).
 - **Multi-pass authoring** — a 4-pass prompt chain rather than a single prompt.
 - **Numeric verification** — completeness (a scaffolded procedure is a
-  hard stop, no automatic retry) → lint → semantic audit (fidelity to the
+  hard stop, no automatic retry; a scaffold *phrase* is only a trigger,
+  confirmed or cleared against the Fortran) → lint → semantic audit (fidelity to the
   Fortran; gated — runtime validation cannot be submitted until it is clean)
   → runtime → driver → comparison against the Fortran reference, each step
   blocking the next.
@@ -159,7 +160,7 @@ A project directory instantiates the framework. Generic shape:
 ├── out/                    # all generated pipeline output (see below)
 ├── translations/           # per-LLM result copies
 ├── _compare_results/       # cross-LLM comparison (per-project material)
-├── bridge_test/            # pytest bridge suite
+├── bridge_test/            # optional per-project test additions (the bridge suite is shared, workflow_bridge/)
 ├── reports/                # dated analysis & campaign reports
 └── docs/, memory/          # project-specific notes
 ```
@@ -261,10 +262,10 @@ Four levels, increasing in strength:
 
 | Level | Tool | Checks |
 |---|---|---|
-| 0 — static (login node, no JAX) | `workflow_translator/phase04_04_completeness_check.py`, `phase05_01b_semantic_audit.py`, `audit_gate.py` | translated-not-summarised (scaffold phrases, dead/absent callees, silent stubs ⇒ STOP); fidelity to the Fortran (calls invoked, update terms, table-read base, LUT columns, zero-forever, direction masks …); the gate that runtime validation requires |
+| 0 — static (login node, no JAX) | `workflow_translator/phase04_04_completeness_check.py`, `phase05_01b_semantic_audit.py`, `audit_gate.py` | translated-not-summarised (dead callees, silent stubs ⇒ STOP; a scaffold phrase is a trigger ⇒ confirmed by the Fortran comparison ⇒ STOP, or cleared ⇒ WARN); fidelity to the Fortran (calls invoked, update terms, table-read base, LUT columns, zero-forever, direction masks …); the gate that runtime validation requires |
 | 1 — smoke | `validation/phase05_02_runtime_validate.py` | imports, wrapper callable, core JIT-compiles, outputs finite, shapes match |
-| 2 — unit | `bridge_test/` (pytest) | layout conversion, bridge vs direct call, contract-2 ≡ contract-1 bit-identity, vertical symmetry of direction-parameterised loops, physics sanity ranges |
-| 3 — accuracy | the project's `[comparison].script` | numeric agreement with the Fortran reference; per-variable stats + top-level PASS/FAIL |
+| 2 — unit | shared `workflow_bridge/test_generated_bridge_*.py` + `test_direction_symmetry.py`, plus optional `bridge_test/` additions (pytest) | layout conversion, bridge vs direct call, contract-2 ≡ contract-1 bit-identity, vertical symmetry of direction-parameterised loops, physics sanity ranges |
+| 3 — accuracy | shared `validation/compare_metrics.py` (metrics) + the project's `[comparison].script` (criterion) | numeric agreement with the Fortran reference: per-variable metrics computed by the framework, PASS/FAIL decided by the project's rule |
 
 Level 3 is the authoritative gate. Its schema — variables, phenology gates,
 tolerance rules — is per-project, defined in `[comparison]` in
@@ -276,18 +277,44 @@ in [`../validation/VALIDATION_MANUAL.md`](../validation/VALIDATION_MANUAL.md).
 The LAFT pipeline is project-agnostic: all project-specific values and
 logic live in `config/project.toml`, loaded by `config/framework_config.py`
 (template: `config/project.template.toml`; worked instance:
-`../kessler/config/project.toml`).
+`../kessler/config/project.toml`). The table says, stage by stage, what the
+framework does by itself and what a project must supply **by hand**.
 
-Per project you supply: the Fortran source (one file or several —
-`[source].fortran_files`), a reference driver tree with a captured reference
-output, a hand-ported JAX driver that reads `LAFT_DRIVER_MODE`, the
-`[comparison]` output schema, the per-project `bridge_test/` suite with its
-`TESTING_GUIDE`, and optionally a project prompt-policy file and the
-semantic-audit configuration (`[semantic_audit]`: `lut_indices` /
-`level_conventions`, `prognostic_vars`, `[[table_readers]]`). Everything else — parsing, dependency analysis, bridge
-generation (both contracts), prompt assembly, lint, semantic audit, runtime
-validation, the comparison engine and the profiler — transfers unchanged.
-Instantiation steps: `NEW_PROJECT_CHECKLIST.md`.
+| Stage / artefact | Shared framework code (automatic, metadata-driven) | **Per project, hand-made** |
+|---|---|---|
+| Fortran source | — | `data/src/` (`[source].fortran_files`) |
+| Frontend (phases 01–02) | parse, packets, dependency order, module-var rule | config only (`[heuristics]` name lists) |
+| Bridge (phase 03) | generated from the packets, both contracts | config only (`[bridge.optional_kwargs]`, per-step scalar names) |
+| **Bridge tests** (Stage-1 gate + Step 4.5) | the whole required check-set, since 2026-10-09: `workflow_bridge/test_generated_bridge_layout.py`, `test_generated_bridge_device_entry.py`, `test_direction_symmetry.py` — contract derived from the packets, nothing written per project | **the physics test** (`bridge_test/test_<proc>_bridge.py`: sanity ranges such as θ in 200–400 K, bridge-vs-direct-kernel agreement on physically plausible inputs, error-path behaviour) — the packets do not carry physics; plus, only where the scheme shape needs it: a `bridge_inputs.py` hook, a device-resident chain, a closed-form check, a hand-transcribed pin |
+| Prompts and wrappers (phase 04) | assembled from packets + shared policies | optional project policy file (`[prompts].project_policies`) |
+| Translation | authored by the driving agent or an external model | — (the translation is the object under test) |
+| Completeness check, lint, semantic audit | shared, metadata-driven | config knobs (`[semantic_audit]`), a waiver file |
+| Runtime smoke test (phase 05_02) | inputs built from packet metadata, in memory | config overrides (`[runtime_validation.arg_values]`) where uniform dummies make the Fortran undefined |
+| **Reference truth** | — | the reference driver tree: original Fortran driver, its inputs (Kessler: a seeded synthetic atmosphere written to files), a captured reference output |
+| **JAX driver** | the `LAFT_DRIVER_MODE` convention, the PBS job | `[driver].script`: hand-ported from the project's reference driver, same inputs, same output format (kept by hand so the test does not depend on the machinery under test) |
+| **Comparison** | the contract: run from the project root, exit 0 = PASS, report + JSON with top-level PASS/FAIL; sequencing once per declared bridge contract; **the metrics** (`validation/compare_metrics.py`, since 2026-10-09: max abs error E_v, MAE, RMSE, rRMSE, corr, bitwise/ULP, match at the reference's digits, sha256, identity self-test — computed from the two data sets declared in `[comparison.data]`, no pass/fail) | `[comparison].script`: variable list, file format and the acceptance criterion. Kessler: max abs error ≤ the measured Fortran-vs-Fortran envelope per variable (`[comparison.envelope]`); a project whose reference is single-precision text can only use physics-level criteria. **The framework has no numerical criterion of its own** |
+| Profiler (Stage 3) | trace + nsys jobs, diagnostics, HLO/trace parsers, headroom patterns | `[profiler].inputs_script`: captures one real bridge call from the project's driver and tiles it to ncol — how to capture a call is driver-specific |
+| PBS jobs | canonical scripts in `pbsJobs/` | account / queue / env in the headers; the driver pair renamed per project |
+
+Everything in the middle column transfers unchanged between projects.
+
+**Validated 2026-10-09** on the Kessler project, Stages 0–3 end to end (frontend re-run,
+bridges regenerated, Claude Fable 5.1 translation, profile): every check in the
+middle column ran from framework code and config with **zero per-project test
+code** — bridge gate 14/14, Step-4.5 re-run 25/25, lint 100, audit 0/0, runtime
+all green, metrics computed, profile production_ready — on a project that no
+longer holds any layout or device-entry test file. The hand-made inputs that run
+used were exactly the right-hand column: the Fortran source, the reference
+tree and its seeded inputs, the hand-ported JAX driver, the comparison script
+with the envelope criterion, the physics test, and the profiler inputs script.
+So the accurate sentence is: *the framework's structural, equivalence and
+metric checks are metadata-driven and need no per-project test code; the physics
+knowledge, the ground truth and the acceptance rule stay human inputs by
+design, because they are what the translation is checked against.*
+Instantiation steps: `NEW_PROJECT_CHECKLIST.md` (§3 "the four hand-made
+inputs": Fortran source, reference driver tree, JAX driver, comparison
+script; §3b: bridge-test additions, optional). The bridge-suite evidence is
+`LAYOUT_TEST_MUTATION_CHECK_2026-10-09.md`.
 
 ## Documentation map
 
@@ -315,6 +342,7 @@ Instantiation steps: `NEW_PROJECT_CHECKLIST.md`.
 |---|---|
 | [`architecture.md`](architecture.md) | Stage architecture and multi-LLM fan-out (mermaid diagrams) |
 | [`NEW_PROJECT_CHECKLIST.md`](NEW_PROJECT_CHECKLIST.md) | Instantiating LAFT for a new Fortran code |
+| [`LAYOUT_TEST_MUTATION_CHECK_2026-10-09.md`](LAYOUT_TEST_MUTATION_CHECK_2026-10-09.md) | Evidence for the shared bridge suite: a mutation check against the hand-written Kessler layout test (14/14 vs 11/14 injected defects caught), the end-to-end Kessler run that used it, what was retired and what stays per project |
 
 Change history lives in git (dated docs above record decisions; there is no
 separate change log).

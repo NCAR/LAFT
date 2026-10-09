@@ -73,6 +73,23 @@ contracts = [1, 2]
 # (e.g. a block_rows/columns/tolerance schema).
 script = "out/driver/TODO_compare.py"
 
+[comparison.data]                 # SHARED metrics engine (validation/compare_metrics.py)
+# Declares where the two data sets are so the framework computes the metrics
+# (max|err| E_v, MAE, RMSE, rRMSE, corr, bitwise/ULP, match at the reference's
+# digits, sha256, identity self-test) automatically, before [comparison].script
+# runs. Metrics only — the acceptance criterion is the script's. Two layouts:
+#   format = "per_variable_files": reference/jax are DIRECTORIES holding
+#            <variable>.txt on each side (Kessler)
+#   format = "block_file":         reference/jax are FILES, one whitespace
+#            table each, one column per variable; `variables` falls back to
+#            [comparison].columns; floors from [comparison.floor_columns]
+# Optional: reference_sig_digits = N when the reference writer keeps fewer
+# digits than float64 (enables the match-at-reference-digits count).
+format    = "per_variable_files"
+reference = "TODO/dir/or/file"
+jax       = "out/driver"
+variables = ["TODO"]
+
 [prompts]
 policies_dir = "workflow_translator/prompt_policies"
 # Project-specific policy files appended to Pass-1 prompts. Write one for your

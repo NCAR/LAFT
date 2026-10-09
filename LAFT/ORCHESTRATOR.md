@@ -42,13 +42,24 @@ you translate that scheme. Same instructions, different `config/project.toml`.
 ## Approval gate between every stage (MANDATORY)
 
 **Never advance from one stage to the next on your own — not even when the user
-asked to "run the whole pipeline."** Each stage is a checkpoint. After you
-finish a stage:
+asked to "run the whole pipeline."** Each stage is a checkpoint, and the run
+is narrated so a scientist can follow it as a record, not reconstruct it
+afterwards. For every stage:
 
-1. Confirm the stage's gate is green (see the stage table).
-2. **Report to the user**: what ran, the gate result (e.g. bridge gate `PASS`,
-   comparison `ALL PASS`), and what the *next* stage will do.
-3. **Stop and wait for the user's explicit go-ahead.** Do not start the next
+1. **Announce before running**: say which stage you are about to run and which
+   playbook you are following (e.g. "Following the orchestrator. Stage 0 is the
+   frontend workflow, `workflow_frontend/FRONTEND_WORKFLOW.md`, five phases").
+   Inside a stage, do the same before each PBS job or gate the playbook pauses
+   on.
+2. Run the stage, then confirm its gate is green (see the stage table).
+3. **Report to the user**: what ran, step by step (each command or phase), and
+   **which outputs it generated** — paths and counts (e.g. "2 merged packets in
+   `out/packets/`, index at `out/phase1_index.json`"), the gate result (e.g.
+   bridge gate `PASS`, comparison `ALL PASS`), and what the *next* stage will do.
+   Keep findings that need a decision (a stale packet, a surprising count, a
+   provenance question) in their own clearly marked paragraph, separate from
+   the run narration.
+4. **Stop and wait for the user's explicit go-ahead.** Do not start the next
    stage until they approve.
 
 "Run the whole pipeline" means run the stages *in order with these approval
@@ -106,7 +117,10 @@ Inside Stage 2, a **scaffolded procedure** (TRANSLATE_WORKFLOW §2.5,
 `status = aborted_scaffold`) is such a stop: it is a model/context limit, not a
 code defect — never re-run the same prompt automatically; report the evidence
 and wait for the user's decision (split / change model or prompt policy /
-archive as a failure experiment).
+archive as a failure experiment). A scaffold *phrase* alone does not stop the
+run: the check confirms or clears it against the Fortran for that procedure
+(2026-10-09); only a confirmed scaffold, a commented-out callee or a silent
+stub is the stop.
 
 ## Stage 2 must produce two statistics tables
 

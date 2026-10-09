@@ -49,20 +49,15 @@ import pytest
 
 jax.config.update("jax_enable_x64", True)
 
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-sys.path.insert(0, str(Path(__file__).parent))
+# Shared file (LAFT/workflow_bridge/): the project is whatever the cwd says —
+# contract discovery, the project root and the inputs (generic builder or the
+# project's bridge_test/bridge_inputs.py hook) come from the shared tests.
+_HERE = Path(__file__).resolve().parent
+if str(_HERE) not in sys.path:
+    sys.path.insert(0, str(_HERE))
 
-from test_all_bridges_layout import CONTRACTS, _make_inputs, _import_line  # noqa: E402
-
-try:
-    from test_all_bridges_device_entry import _inputs as _project_inputs, _real_bridge  # noqa: E402
-except Exception:  # noqa: BLE001 — generic fallback when the project has no device-entry suite
-    _project_inputs = None
-
-    def _real_bridge(proc):
-        import importlib
-        return importlib.import_module(f"out.bridge.{proc}_bridge")
+from test_generated_bridge_layout import CONTRACTS, PROJECT_ROOT as project_root  # noqa: E402
+from test_generated_bridge_device_entry import _inputs as _dev_inputs, _real_bridge  # noqa: E402
 
 F90_DIR = project_root / "out" / "procedures"
 REPORT = project_root / "out" / "reports" / "bridge" / "direction_symmetry.json"
@@ -143,6 +138,18 @@ def _discover():
                 ax = _level_axis(f_txt, p.name, var)
                 if ax is not None:
                     axes[c.py[p.name]] = ax
+        # whole-array copies from a loop-indexed local (`massflux = flux_qx`,
+        # `x(:) = y`): the argument carries the level axis of its source.
+        # (2026-10-09: without this, such an output is compared unflipped and
+        # fails the symmetry check.)
+        for p in c.params:
+            if p.rank > 0 and c.py[p.name] not in axes:
+                for m in re.finditer(rf"^\s*(?:if\s*\(.*\)\s*)?{re.escape(p.name)}\s*(?:\(\s*:\s*\))?\s*=\s*([A-Za-z_]\w*)\s*(?:\(\s*:\s*\))?\s*$",
+                                     f_txt, re.I | re.M):
+                    ax = _level_axis(f_txt, m.group(1), var)
+                    if ax is not None:
+                        axes[c.py[p.name]] = ax
+                        break
         if not axes:
             excluded.append((proc, "no array argument is indexed by the loop variable"))
             continue
@@ -164,12 +171,7 @@ CASES, EXCLUDED = _discover()
 
 
 def _inputs(proc):
-    if _project_inputs is not None:
-        try:
-            return _project_inputs(proc)
-        except Exception:  # noqa: BLE001
-            pass
-    return _make_inputs(CONTRACTS[proc])
+    return _dev_inputs(proc)      # project hook if present, else the generic kernel inputs
 
 
 def _flip(inputs, case):

@@ -46,5 +46,16 @@ cfg_get() {
 COMPARE_SCRIPT="$(cfg_get comparison script)"
 [ -n "${COMPARE_SCRIPT}" ] || { echo "ERROR: [comparison].script not found in config/project.toml"; exit 1; }
 
-python3 "${COMPARE_SCRIPT}" 
+# 1. SHARED metrics (since 2026-10-09): validation/compare_metrics.py reads the
+#    two data sets declared in [comparison.data] and writes
+#    out/driver/compare_metrics.{json,txt} — max|err| E_v, MAE, RMSE, rRMSE,
+#    corr, bitwise/ULP, match at the reference's digits, sha256, identity
+#    self-test. Metrics only; it never prints PASS/FAIL. A project without
+#    [comparison.data] gets "not_configured" and continues.
+echo "=== Shared metrics (validation/compare_metrics.py) ==="
+python3 validation/compare_metrics.py
+
+# 2. The PROJECT's criterion ([comparison].script) — this is the gate.
+echo "=== Project comparison script (${COMPARE_SCRIPT}) ==="
+python3 "${COMPARE_SCRIPT}"
 
