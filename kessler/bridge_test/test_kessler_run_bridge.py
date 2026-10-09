@@ -7,8 +7,8 @@ they belong to the TRANSLATOR workflow's validation stage — run them after a
 translation lands, not after bridge generation. If the translation (or the
 bridge) is missing, the whole file skips with a clear reason.
 
-The translation-INDEPENDENT layout/wiring tests live in
-bridge_test/test_kessler_run_bridge_layout.py (bridge-workflow gate).
+The translation-INDEPENDENT layout/wiring tests are the shared
+workflow_bridge/test_generated_bridge_layout.py (bridge-workflow gate).
 
 Run with:
     python -m pytest bridge_test/test_kessler_run_bridge.py -v
@@ -118,7 +118,7 @@ def sample_inputs():
 
 # ---------------------------------------------------------------------------
 # Bridge functionality tests
-# (layout-conversion tests moved to test_kessler_run_bridge_layout.py)
+# (layout-conversion tests: the shared workflow_bridge/test_generated_bridge_layout.py)
 # ---------------------------------------------------------------------------
 
 class TestBridgeFunctionality:
