@@ -1,6 +1,6 @@
 {
   "module_name": "kessler",
-  "source_file": "data/src/kessler.F90",
+  "source_file": "data/exp1_baseline/src/kessler.F90",
   "uses_modules": [
     "ccpp_kinds"
   ],

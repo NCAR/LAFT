@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-10-09T12:20:10",
+  "status": "n/a \u2014 no procedure with an identifier-stride level loop whose bounds and direction are arguments",
+  "cases": {},
+  "excluded": {
+    "kessler_run": "direction `lyr_step` of `do klev=lyr_surf,lyr_toa,lyr_step` is not an integer scalar argument (local or module state)"
+  }
+}

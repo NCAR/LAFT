@@ -1,6 +1,12 @@
 {
-  "source_file": "data/src/kessler.F90",
+  "source_file": "data/exp1_baseline/src/kessler.F90",
+  "source_files": [
+    "data/exp1_baseline/src/kessler.F90"
+  ],
   "syntax_ok": true,
+  "syntax_ok_by_file": {
+    "data/exp1_baseline/src/kessler.F90": true
+  },
   "openmp_directives": [],
   "warnings": [],
   "procedures_written": 2,
@@ -54,7 +60,7 @@
           "intent": "out"
         }
       },
-      "source_file": "data/src/kessler.F90",
+      "source_file": "data/exp1_baseline/src/kessler.F90",
       "unit_file": "out/procedures/kessler_init.F90",
       "start_byte": 523,
       "end_byte": 1153
@@ -250,7 +256,7 @@
           "intent": null
         }
       },
-      "source_file": "data/src/kessler.F90",
+      "source_file": "data/exp1_baseline/src/kessler.F90",
       "unit_file": "out/procedures/kessler_run.F90",
       "start_byte": 3663,
       "end_byte": 14857
@@ -261,7 +267,7 @@
     {
       "kind": "module",
       "name": "kessler",
-      "source_file": "data/src/kessler.F90",
+      "source_file": "data/exp1_baseline/src/kessler.F90",
       "block_file": "out/modules/kessler.F90",
       "start_byte": 0,
       "end_byte": 14954
@@ -270,7 +276,7 @@
   "module_metadata": [
     {
       "module_name": "kessler",
-      "source_file": "data/src/kessler.F90",
+      "source_file": "data/exp1_baseline/src/kessler.F90",
       "uses_modules": [
         "ccpp_kinds"
       ],

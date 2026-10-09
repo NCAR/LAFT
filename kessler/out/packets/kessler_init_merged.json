@@ -6,6 +6,11 @@
     "pref",
     "rhoqr"
   ],
+  "module_vars_direct": [
+    "lv",
+    "pref",
+    "rhoqr"
+  ],
   "layout_policy": {
     "mode": "bridge",
     "rule": "Bridge layer handles Fortran column-major \u2194 row-major conversion. Translated core + wrapper operate purely on row-major arrays. No transpose/swapaxes logic inside translated compute modules.",

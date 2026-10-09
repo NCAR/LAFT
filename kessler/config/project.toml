@@ -12,7 +12,13 @@ name = "Kessler"
 [source]
 # Fortran source file(s) parsed by phase01 (currently exactly one supported).
 # The JD experiment: 128x56 grid, all-column kessler (data/exp2_jd/).
-fortran_files = ["data/exp2_jd/src/kessler.F90"]
+# The scheme translated by the four archived runs is the PER-COLUMN Kessler
+# (data/exp1_baseline/src/kessler.F90 — the Fortran embedded in every archive's
+# prompts). Validation uses the JD configuration (data/exp2_jd/: inputs, reference
+# driver and outputs, envelope). data/exp2_jd/src/kessler.F90 is the JD all-column
+# scheme (three procedures, incl. the all_equal helper) the reference driver
+# compiles; switch fortran_files to it and re-run Stage 0 to translate that text.
+fortran_files = ["data/exp1_baseline/src/kessler.F90"]
 # Root of all generated pipeline artifacts
 out_root = "out"
 

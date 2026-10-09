@@ -11,15 +11,19 @@ this directory as the project root, and the pipeline scripts and PBS jobs in
 | Folder | What it holds |
 |---|---|
 | `config/` | `project.toml` — the LAFT project configuration (source file, reference data, driver, comparison, profiler, HPC job names). |
-| `data/exp2_jd/` | The Fortran reference. `src/` has the scheme (`kessler.F90`), the CCPP metadata, the reference driver (`JD_kessler_driver.F90`), the input generator, a Makefile, the scalability benchmark source, and the golden compiler logs. `kessler_update.F90` is the companion CCPP scheme the reference driver calls after the microphysics for diagnostic checksums; it only reads the Kessler fields and is not translated in this work. `acc_src/` has the manually accelerated OpenACC GPU version of the scheme with its driver, Makefile, and profiling runner (see `acc_src/README.md`). `fortran_io/` has the 128-column × 56-level inputs and the Fortran outputs every translation is compared against. |
-| `out/` | Snapshot of the LAFT pipeline artifacts shared by every run: the frontend extraction (`phase1_index.json`, `modules/`, `procedures/`, `packets/`), the generated bridge (`bridge/`), wrappers, the JAX driver and the Fortran-vs-JAX comparison script (`driver/`), and the profiler input script. `out/jax/` is intentionally empty — each model's translation lives under `translations/`. |
+| `data/exp1_baseline/src/` | `kessler.F90`, the per-column Kessler scheme the four translations were produced from (`[source].fortran_files`); see `data/README.md`. |
+| `data/exp2_jd/` | The Fortran reference used for validation. `src/` has the JD all-column scheme (`kessler.F90`, compiled by the reference driver; not the translated text — see `data/README.md`), the CCPP metadata, the reference driver (`JD_kessler_driver.F90`), the input generator, a Makefile, the scalability benchmark source, and the golden compiler logs. `kessler_update.F90` is the companion CCPP scheme the reference driver calls after the microphysics for diagnostic checksums; it only reads the Kessler fields and is not translated in this work. `acc_src/` has the manually accelerated OpenACC GPU version of the scheme with its driver, Makefile, and profiling runner (see `acc_src/README.md`). `fortran_io/` has the 128-column × 56-level inputs and the Fortran outputs every translation is compared against. |
+| `out/` | Snapshot of the LAFT pipeline artifacts shared by every run: the frontend extraction (`phase1_index.json`, `modules/`, `procedures/`, `packets/`), the generated bridge (`bridge/`), wrappers, the JAX driver and the Fortran-vs-JAX comparison script (`driver/`), the profiler input script, and the Stage-1 bridge gate verdict of the shared test suite (`reports/bridge/`, 2026-10-09: 14 layout tests passed on these bridges). `out/jax/` is intentionally empty — each model's translation lives under `translations/`. |
 | `bridge_test/` | The project's bridge unit tests (pytest). They import from `out/bridge/` and, for the translation-dependent tests, from `out/jax/`; those skip themselves when no translation is staged there. See `bridge_test/TESTING_GUIDE.md`. |
 | `translations/` | One archive per model, described below. |
 | `_compare_results/` | Cross-model analysis of the April 2026 runs: the performance comparison report, accuracy and GPU scalability plots, and Nsight Systems profiling reports. Under `outputs/scalability/` are the timing JSONs behind the scalability figure (serial Fortran CPU and the four JAX translations). The cross-model evaluation scripts that produced these outputs are not part of LAFT and are not included; the serial Fortran benchmark source is `data/exp2_jd/src/scalability_benchmark_fortran.F90`. |
 
 ## The four translations
 
-All four were produced in April 2026 from the JD-data Fortran (`data/exp2_jd/`).
+All four were produced in April 2026 from the per-column Kessler scheme
+(`data/exp1_baseline/src/kessler.F90`, the Fortran embedded in each archive's
+prompts) and validated against the JD-data configuration (`data/exp2_jd/`:
+inputs, reference driver and outputs).
 On 2026-09-04 each was re-validated, unchanged, under the current LAFT bridge:
 the JAX files were copied verbatim into the pipeline (a version header was
 added), pushed through lint, semantic audit, runtime validation, the bridge test

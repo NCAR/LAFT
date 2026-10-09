@@ -2,7 +2,7 @@
   "modules": [
     {
       "name": "kessler",
-      "file": "data/src/kessler.F90",
+      "file": "data/exp1_baseline/src/kessler.F90",
       "uses": [],
       "level": 0,
       "procedures": [

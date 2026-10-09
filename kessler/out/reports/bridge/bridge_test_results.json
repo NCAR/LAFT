@@ -1,0 +1,197 @@
+{
+  "status": "PASS",
+  "date": "2026-10-09 12:20:11",
+  "pytest_exit_code": 0,
+  "require_dependent": true,
+  "gate_rule": "all bridge_test/test_*_layout.py tests pass, zero skips among them, no failures/errors anywhere; AND every translation-dependent test runs and passes (--require-dependent)",
+  "bridges": [
+    "kessler_init_bridge.py",
+    "kessler_run_bridge.py"
+  ],
+  "suite": {
+    "shared": [
+      "workflow_bridge/test_generated_bridge_layout.py",
+      "workflow_bridge/test_generated_bridge_device_entry.py",
+      "workflow_bridge/test_direction_symmetry.py"
+    ],
+    "per_project": [
+      "bridge_test/test_kessler_run_bridge.py"
+    ]
+  },
+  "layout_tests": {
+    "total": 14,
+    "passed": 14,
+    "skipped": 0
+  },
+  "translation_dependent_tests": {
+    "total": 11,
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0,
+    "state": "passed"
+  },
+  "analysis_reports": [
+    {
+      "file": "kessler_init_analysis.txt",
+      "safety": "Safety: UNKNOWN",
+      "gpu_warning": false
+    },
+    {
+      "file": "kessler_run_analysis.txt",
+      "safety": "Safety: UNSAFE",
+      "gpu_warning": true
+    }
+  ],
+  "tests": [
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout",
+      "test": "test_generated_bridge_layout::test_bridges_found",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout",
+      "test": "test_generated_bridge_layout::test_every_generated_bridge_has_a_contract",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout",
+      "test": "test_generated_bridge_layout::test_partition_array_vs_scalar",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout.TestArrayBridge",
+      "test": "TestArrayBridge::test_transfer_helpers[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout.TestArrayBridge",
+      "test": "TestArrayBridge::test_two_entries_and_alias[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout.TestArrayBridge",
+      "test": "TestArrayBridge::test_static_argnames_match_rule[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout.TestArrayBridge",
+      "test": "TestArrayBridge::test_passthrough_roundtrip_identity[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout.TestArrayBridge",
+      "test": "TestArrayBridge::test_outputs_c_order_and_dtype[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout.TestArrayBridge",
+      "test": "TestArrayBridge::test_core_sees_reversed_layout[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout.TestArrayBridge",
+      "test": "TestArrayBridge::test_static_scalars_concrete_and_others_traced[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout.TestArrayBridge",
+      "test": "TestArrayBridge::test_character_args_stay_host_side[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout.TestArrayBridge",
+      "test": "TestArrayBridge::test_optional_kwargs_forwarded[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout.TestScalarBridge",
+      "test": "TestScalarBridge::test_no_device_entry_and_no_transfers[kessler_init]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_layout.TestScalarBridge",
+      "test": "TestScalarBridge::test_wrapper_called_and_returns_passed_through[kessler_init]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_device_entry",
+      "test": "test_generated_bridge_device_entry::test_array_bearing_procedures_known",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_device_entry.TestDeviceEntryContract",
+      "test": "TestDeviceEntryContract::test_translation_present[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_device_entry.TestDeviceEntryContract",
+      "test": "TestDeviceEntryContract::test_public_entry_and_alias[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_generated_bridge_device_entry.TestDeviceEntryContract",
+      "test": "TestDeviceEntryContract::test_device_entry_bit_identical_to_host_bridge[kessler_run]",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "workflow_bridge.test_direction_symmetry",
+      "test": "test_direction_symmetry::test_direction_symmetry_applicability",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_runs_successfully",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_bridge_vs_direct_jax",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_driver_layout_preserved",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_physics_sanity",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_error_handling_negative_dt",
+      "outcome": "passed",
+      "message": ""
+    },
+    {
+      "file": "bridge_test.test_kessler_run_bridge.TestBridgeFunctionality",
+      "test": "TestBridgeFunctionality::test_module_vars_inout_pattern",
+      "outcome": "passed",
+      "message": ""
+    }
+  ]
+}
