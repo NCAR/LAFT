@@ -175,7 +175,8 @@ while the translation it needs is absent:
 - **a hand-transcribed pin** of a key procedure's contract, which fails when
   the packets drift even though the shared suite — which trusts the
   packets — still passes (a per-procedure file that transcribes the
-  signature, as `kessler/bridge_test/test_kessler_run_bridge_layout.py` does);
+  signature, as the retired `kessler/bridge_test/test_kessler_run_bridge_layout.py`
+  did — kept in the repository history);
 - **the `bridge_inputs.py` hook** described above.
 
 A project with none of these has no `bridge_test/` folder at all.

@@ -3,7 +3,9 @@
 **Question.** Can the per-project, hand-written bridge layout test be replaced
 by one shared file that derives the contract from the packets? The shared file
 is `workflow_bridge/test_generated_bridge_layout.py`; the hand-written
-reference is `kessler/bridge_test/test_kessler_run_bridge_layout.py`.
+reference is the hand-written `kessler/bridge_test/test_kessler_run_bridge_layout.py`,
+retired on 2026-10-09 and kept in the repository history (commit 2455961), which
+is where `tools/mutation_check_layout_tests.py` reads it from.
 
 **Method.** `tools/mutation_check_layout_tests.py` copies the Kessler project
 (config, packets, phase-1 index, generated bridges, the hand-written test) to a
@@ -63,8 +65,9 @@ translations the project holds in its development tree (4 tests each, 1–4 s).
   the real kernel). They derive the expected contract from the same packets
   phase03 read, so they cannot catch a wrong packet; that is the frontend
   stage's and the semantic audit's job.
-- The hand-written file remains useful as a **pin**: a transcribed signature
-  that fails when the packets drift. It is no longer needed for coverage.
+- A hand-written file can still serve as a **pin**: a transcribed signature
+  that fails when the packets drift. It is no longer needed for coverage, and
+  the Kessler project no longer carries one.
 
 ## Two limits of synthetic inputs, learned by running real kernels
 

@@ -35,9 +35,9 @@ statics) — it cannot catch a wrong packet. That is what the frontend stage
 and the semantic audit are for.
 
 History: generalised 2026-10-09 from a per-project parameterised layout test
-(2026-08-24, PATH C + two contracts); a per-project hand-written layout file
-(kessler/bridge_test/test_kessler_run_bridge_layout.py) remains as a
-hand-transcribed pin. Dimensions, integer values and counts that were
+(2026-08-24, PATH C + two contracts); the per-project hand-written layout file
+it replaced (kessler/bridge_test/test_kessler_run_bridge_layout.py) is kept in
+the repository history as the reference for the mutation check. Dimensions, integer values and counts that were
 project-specific are derived or dropped here.
 
 Run from a project root (jax-validate env):
