@@ -12,7 +12,7 @@ The repository has two parts:
 | Folder | What it is | Start with |
 |---|---|---|
 | [`LAFT/`](LAFT/) | The framework: Fortran parsing, bridge generation, multi-pass prompt authoring, lint, semantic audit, runtime validation, driver comparison, and GPU profiling. Project-agnostic; every project-specific value comes from a `config/project.toml`. | [`LAFT/docs/README.md`](LAFT/docs/README.md) for the overview, [`LAFT/ORCHESTRATOR.md`](LAFT/ORCHESTRATOR.md) to run it |
-| [`kessler/`](kessler/) | The paper-1 project: the Kessler Fortran reference and data, the pipeline snapshot, the bridge tests, the four LLM translations with their full validation records, and the cross-model comparison outputs. | [`kessler/README.md`](kessler/README.md) |
+| [`kessler/`](kessler/) | The paper-1 project: the Kessler Fortran reference and data, the pipeline snapshot, the project's physics test (the bridge test suite is part of the framework), the four LLM translations with their full validation records, and the cross-model comparison outputs. | [`kessler/README.md`](kessler/README.md) |
 
 ## The four translations
 
