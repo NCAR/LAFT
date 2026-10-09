@@ -442,7 +442,10 @@ with `status="waiting_for_runtime_validation"`, report the job id, and stop.
 
 After runtime validation passes, run the bridge suite against the real
 translation — unit-level bridge↔kernel equivalence *before* paying for the
-end-to-end driver job:
+end-to-end driver job. This is the second run of the same framework test
+files the bridge workflow ran at Stage 1 (nothing is created here): Stage 1
+proved the bridges match the packets with a fake kernel; this run executes the
+real kernel and requires the translation-dependent tests to pass:
 
 ```bash
 qsub -v TEST_SCRIPT=workflow_bridge/run_bridge_tests.py,TEST_ARGS=--require-dependent pbsJobs/jax_cpu_test.sh

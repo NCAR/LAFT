@@ -104,6 +104,11 @@ driver — no hidden state).
 
 ## Step 2 — Test gate (translation-independent)
 
+This step creates no test: the suite is framework code in
+`workflow_bridge/` (below) and this is the first of its two runs — against the
+generated bridges alone, with a fake kernel in place of the translation. The
+second run is the translator workflow's Step 4.5, against the real translation.
+
 ```bash
 qsub -v TEST_SCRIPT=workflow_bridge/run_bridge_tests.py pbsJobs/jax_cpu_test.sh
 ```

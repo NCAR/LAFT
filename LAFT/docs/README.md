@@ -264,8 +264,23 @@ Four levels, increasing in strength:
 |---|---|---|
 | 0 — static (login node, no JAX) | `workflow_translator/phase04_04_completeness_check.py`, `phase05_01b_semantic_audit.py`, `audit_gate.py` | translated-not-summarised (dead callees, silent stubs ⇒ STOP; a scaffold phrase is a trigger ⇒ confirmed by the Fortran comparison ⇒ STOP, or cleared ⇒ WARN); fidelity to the Fortran (calls invoked, update terms, table-read base, LUT columns, zero-forever, direction masks …); the gate that runtime validation requires |
 | 1 — smoke | `validation/phase05_02_runtime_validate.py` | imports, wrapper callable, core JIT-compiles, outputs finite, shapes match |
-| 2 — unit | shared `workflow_bridge/test_generated_bridge_*.py` + `test_direction_symmetry.py`, plus optional `bridge_test/` additions (pytest) | layout conversion, bridge vs direct call, contract-2 ≡ contract-1 bit-identity, vertical symmetry of direction-parameterised loops, physics sanity ranges |
+| 2 — unit | shared `workflow_bridge/test_generated_bridge_*.py` + `test_direction_symmetry.py` (framework files, run twice — see below), plus optional `bridge_test/` additions (pytest) | layout conversion, bridge vs direct call, contract-2 ≡ contract-1 bit-identity, vertical symmetry of direction-parameterised loops, physics sanity ranges |
 | 3 — accuracy | shared `validation/compare_metrics.py` (metrics) + the project's `[comparison].script` (criterion) | numeric agreement with the Fortran reference: per-variable metrics computed by the framework, PASS/FAIL decided by the project's rule |
+
+**Who creates the bridge tests, and when they run.** Nobody creates them per
+run or per project: the three level-2 files are framework code that exists
+before any run. What each file checks is worked out at run time from the
+project's packets (the same metadata the bridge was generated from), so the
+expectations are built fresh per project but no test file is ever written.
+They run at two moments. The **bridge workflow (Stage 1)** runs them right
+after phase 03, against the generated bridges alone — a pass-through fake
+kernel stands in for the translation, so the gate proves the bridges match
+the packets; the translation-dependent files are collected but skip
+themselves, since `out/jax/` is still empty. The **translate workflow (Step
+4.5)** runs the same files again once a translation exists, now executing
+the real kernel: contract 2 bit-identical to contract 1, the symmetry
+check, and the project's own physics test, all required to pass. Same
+files, same assertions, two different things under test.
 
 Level 3 is the authoritative gate. Its schema — variables, phenology gates,
 tolerance rules — is per-project, defined in `[comparison]` in
